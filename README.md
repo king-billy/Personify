@@ -1,2 +1,41 @@
-# Personify
-An application that provides personalized personality insights based on the users' Spotify listening habits
+1. Requirements
+   
+    1.1. Overview  
+We aim to develop an application that provides personalized personality insights based on the users' Spotify listening habits. By integrating the open-source Spotify API with a machine learning model we plan to develop, our app will analyze a user's listening history to discover patterns and categorize their musical "vibes."
+
+    1.2. Features
+A user interface designed to analyze and showcase a user’s music personality, offering a seamless experience with just a simple click. The interface would allow users to instantly discover their unique "music personality," which could be based on listening habits, preferences, and emotional patterns derived from their music consumption.
+The platform would also provide a detailed breakdown of the user’s "moods" or emotional states tied to their music choices, offering an explanation of how the model arrived at these insights.
+To make the experience more personalized and actionable, the interface would also highlight top songs, albums, or playlists that align with the identified mood or vibe.
+Users can explore a "look back" feature that visualizes how their musical vibes and moods have evolved over time. 
+The platform would also include an option for users to provide feedback on the model's accuracy and recommendations.
+The interface would enable social sharing features, allowing users to share their music personality profiles or curated playlists with friends and other users.
+
+    1.3. Functional Requirements (Use cases)
+1. Authentication: As a user, I want to log in using my Spotify credentials so that I can securely access the application without creating a separate account. The application should request and obtain the necessary permissions to access my Spotify listening history, playlists, and preferences. If the login is successful, I will be granted access; otherwise, the application will let me know there was an error logging in.
+
+2. Retrieving and Processing Listening History: As a user, I want the application to retrieve and process my Spotify listening history, including tracks, artists, genres, and timestamps, so that it can analyze my music preferences. The application should extract meaningful information such as frequently listened-to genres, listening patterns, and preferences to provide personalized insights.
+
+3. Categorizing Musical Preferences: As a user, I want the application to generate and display personalized personality insights based on my listening history, so that I can gain a deeper understanding of what my music taste implies about my personality. The insights should be presented in a user-friendly format with visual charts and infographics.
+
+4. User Feedback on Insights: As a user, I want to provide feedback on the accuracy of the personality insights (e.g., “This matches my personality”), so that the application can improve its analysis over time. The feedback data should be used to fine-tune the model and improve future insights.
+
+5. Customization: As a user, I want to customize the personality insights by selecting specific time ranges or playlists to include in the analysis, so that I can gain a more accurate understanding of my patterns and behavior, given that my activity varies significantly by time period. There should be a compact slider that allows me to easily select and adjust the time ranges and playlists I want to include in the analysis.
+
+6. Exporting and Sharing: As a user, I want to export and share my personality insights with friends so that I can share my music taste and personality analysis, and encourage my friends to also use the application. There should be a share button that generates a report that can be shared through social media or direct links.
+
+7. Comparing Trends: As a user, I want to compare my personality insights and music preferences with other users (e.g., “Your songs are more happy than 60% of our users!”). There should be a section that provides visualizations and information about how my personality compares to other users.
+
+8. Managing Users: As an admin, I want to manage user accounts (create, update, or deactivate) so I can make sure that only authorized users have access to the application. There should be a special admin interface for managing user accounts.
+
+    1.4. Non-Functional Requirements
+Performance: The application should be able to process a user’s Spotify listening data and generate personality insights within 2 to 5 seconds of receiving the data. This ensures a seamless user experience, preventing delays that could lead to frustration or disengagement. Optimized data processing techniques, efficient database queries, and caching strategies should be implemented to achieve this goal.
+Scalability: As user adoption grows, the system should be capable of handling a handful concurrent users without any noticeable decline in performance. This will require a well-structured backend that can scale horizontally, leveraging cloud-based solutions and load balancing to distribute requests effectively across multiple servers.
+Security and Privacy: User listening data is sensitive and should be encrypted in transit and at rest to protect user privacy. The application must  comply with Spotify API usage policies, ensuring that no unauthorized access or data breaches occur. Users should have an option to delete their stored data upon request. Additionally, an administrator page will also be implemented to provide a holistic control for users.
+Usability and Accessibility: The interface should be intuitive and visually engaging, providing clear personality insights without requiring a steep learning curve. Accessibility features such as screen reader compatibility, color contrast settings, and keyboard navigation will be implemented to ensure inclusivity amongst project users.
+Maintainability and Extensibility: The application should be designed with a modular architecture, making it easy to introduce new features on the go, update any models in use, or integrate additional music platforms beyond Spotify in the future. Clear documentation and well-structured code should also be maintained to facilitate ongoing development and troubleshooting.
+    1.5. Challenges & Risks
+Privacy & API: Since our proposed application will require access to users' Spotify data, we need to ensure secure access and selective use of data. We also must ensure our app only has access to necessary features so as to not breach trust or gain access to unauthorized data. For example, we don’t want our app gaining access to personal information or settings, only listening history and playlist related information.
+API limitations will be expanded upon further in later checkpoints, since the coding process is not yet under way. However, we know that we will be relying heavily on the Spotify API, meaning our data access and rate limits are subject to the rules of API use. This also includes listening data not updating in time or accurately, or users’ data being spread too thin to draw a mood analysis from.
+
+Feedback scope & Bias: Our project relies very heavily on user interaction and feedback. On the issue of feedback, it is important to remember to stay in the scope of the project. If feedback received deals with the UX or confusion around how the process works it should be addressed accordingly, however, we should not modify the expectations and guidelines of the project just to fit different requests that users may have. On the issue of user bias, using listening data to create a “mood” has a certain air of subjectivity, and we need to decide how to address specific use cases. There may be instances where certain songs are tagged incorrectly or not tagged at all, which could shift or distort the users' mood profile results. There is also the question of how to deal with repeated songs. Should repeated songs be weighed equally, or should the influence wane over time? On top of that, our description of moods should be unique enough and set it apart from surface level observations that can be made about a users’ music taste. We want them to gain insights and learn about how their music taste is perceived, not tell them things they already know. This could include adding facts about genres they listen to, or what genres that other users with similar taste are listening to.
