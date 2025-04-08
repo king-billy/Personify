@@ -1,3 +1,49 @@
+# Spotify Developer Setup
+
+## Setting Up Spotify Developer Access
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
+2. Log in with your Spotify account.
+3. Click **"Create App"**.
+4. Name your app and add a short description.
+5. After creating the app, you’ll be provided with:
+   - **Client ID**
+   - **Client Secret**
+6. Add a **Redirect URI**, for example:
+ ```
+   http://localhost:8888/callback
+   ```
+
+## Python Environment Setup (For Classification)
+
+#### If you're on **macOS/Linux**:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### If you're on **Windows**:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Running the Jupyter Notebook
+
+1. Create a `.env` file and set your credentials:
+   You can export them as environment variables:
+   ```bash
+   export CLIENT_ID='your_client_id'
+   export CLIENT_SECRET='your_client_secret'
+   export REDIRECT_URI='http://localhost:8888/callback'
+   ```
+
+# Project Proposal
+
 ## 1. Requirements
 
 ### 1.1 Overview
