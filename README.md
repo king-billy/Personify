@@ -1,3 +1,6 @@
+> [!NOTE]
+> This is a group project for COMPSCI 520.
+
 ## 1. Requirements
 
 ### 1.1 Overview
