@@ -40,6 +40,23 @@ MIDDLEWARE_PORT=6969
 
 > [!IMPORTANT]
 > You will need an account from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) to generate the `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
+>
+> To do so,
+>
+> 1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
+> 2. Log in with your Spotify account.
+> 3. Click **"Create App"**.
+> 4. Name your app and add a short description.
+> 5. After creating the app, you’ll be provided with:
+>
+> -   **Client ID**
+> -   **Client Secret**
+>
+> 6. Add a **Redirect URI**, for example:
+>
+> ```
+>  http://localhost:6969/callback
+> ```
 
 Then install dependencies and run the middleware:
 
