@@ -7,7 +7,7 @@ import meRoutes from "./routes/me";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8888;
+const PORT = process.env.MIDDLEWARE_PORT || 6969;
 
 app.use(cors());
 app.use(express.json());

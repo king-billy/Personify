@@ -1,7 +1,6 @@
 "use client";
 import LoginSection from "@/components/LoginSection";
 import Image from "next/image";
-import React from "react";
 
 const cards = Array(9).fill(null);
 
