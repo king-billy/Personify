@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { SPOTIFY_SCOPES } from "../constants";
 
 const router = Router();
 
@@ -7,7 +8,7 @@ const router = Router();
  * @desc    Redirects the user to Spotify's authorization page to start OAuth flow
  */
 router.get("/login", (_, res) => {
-	const scope = "user-read-private user-read-email user-top-read";
+	const scope = SPOTIFY_SCOPES.join(" ");
 
 	const params: URLSearchParams = new URLSearchParams({
 		response_type: "code",
