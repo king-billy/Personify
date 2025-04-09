@@ -1,0 +1,22 @@
+{
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"bracketSpacing": true,
+	"endOfLine": "lf",
+	"importOrder": [
+		"^react(.*)$",
+		"^.+\\.(css|scss|sass|less)$",
+		"^(~\\/|@)?\\/?((?!src)components|constants|defaults|media|reducers|root|provider|screens)",
+		"^[./]"
+	],
+	"importOrderSeparation": false,
+	"importOrderSortSpecifiers": true,
+	"jsxBracketSameLine": false,
+	"printWidth": 120,
+	"scssSyntax": true,
+	"semi": true,
+	"singleQuote": false,
+	"tabWidth": 4,
+	"trailingComma": "all",
+	"useTabs": true
+}
