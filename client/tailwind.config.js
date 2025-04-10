@@ -4,4 +4,5 @@ module.exports = {
 		extend: {},
 	},
 	plugins: [require("tailwindcss-font-inter")()],
+	safelist: ["bg-pink-100", "bg-yellow-100", "bg-cyan-100", "bg-green-100"],
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { SPOTIFY_ACCESS } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -9,11 +10,12 @@ export default function CallbackPage() {
 	useEffect(() => {
 		const url = new URL(window.location.href);
 		const accessToken = url.searchParams.get("access_token");
-		const localStorageKey = "spotify_access_token";
 
 		if (accessToken) {
-			localStorage.setItem(localStorageKey, accessToken);
-			router.replace("/success");
+			localStorage.setItem(SPOTIFY_ACCESS, accessToken);
+
+			// router.replace("/success");
+			router.replace("/dashboard");
 		} else {
 			console.error("No access token found");
 		}
