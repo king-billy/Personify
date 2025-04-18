@@ -1,13 +1,21 @@
 import { MIDDLEWARE_PORT, SPOTIFY_ACCESS } from "@/lib/constants";
 
-const fetchWithToken = async (endpoint: string) => {
-	const token = localStorage.getItem(SPOTIFY_ACCESS);
+export interface SPOTIFY_DATA_INTERFACE {
+	bearer: string;
+	expiration: string;
+}
 
-	if (!token) throw new Error("No access token found");
+export const fetchAccess = async (endpoint: string) => {
+	const accessData = localStorage.getItem(SPOTIFY_ACCESS);
+	if (!accessData) {
+		throw new Error("No access token found");
+	}
+
+	const parsedAccessData: SPOTIFY_DATA_INTERFACE = JSON.parse(accessData);
 
 	const res = await fetch(`http://localhost:${MIDDLEWARE_PORT}${endpoint}`, {
 		headers: {
-			Authorization: `Bearer ${token}`,
+			Authorization: `Bearer ${parsedAccessData.bearer}`,
 		},
 	});
 
@@ -18,4 +26,4 @@ const fetchWithToken = async (endpoint: string) => {
 	return res.json();
 };
 
-export default fetchWithToken;
+export const matchExpiration = () => {};
