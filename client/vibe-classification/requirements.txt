@@ -1,9 +1,0 @@
-google-generativeai
-ipython
-python-dotenv
-pandas
-numpy
-matplotlib
-seaborn
-spotipy
-pytest

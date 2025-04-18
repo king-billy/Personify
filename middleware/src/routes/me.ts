@@ -1,7 +1,176 @@
 import { Request, Response, Router } from "express";
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Load environment variables
+import dotenv from "dotenv";
+import path from "path";
+
+const envPath = path.resolve(__dirname, "../../.env");
+dotenv.config({ path: envPath });
+
+export const config = {
+  spotify: {
+    clientId: process.env.SPOTIFY_CLIENT_ID,
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    redirectUri: process.env.REDIRECT_URI,
+  },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY,
+  },
+  port: process.env.MIDDLEWARE_PORT || 6969,
+};
+
+/**
+ * Classify user's top tracks into vibes using Gemini
+ * @param {string} token - Spotify access token
+ * @param {string} timeRange - Time range for top tracks ("short_term", "medium_term", "long_term")
+ * @returns {Promise<Record<string, number>>} Object with vibe percentages
+ */
+async function classifyVibes(
+  token: string,
+  timeRange: string = "short_term"
+): Promise<Record<string, number>> {
+  console.log("Starting vibe classification with time range:", timeRange);
+
+  try {
+    // Verify token first with a simple request
+    const testResponse = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!testResponse.ok) {
+      const errorData = await testResponse.json();
+      throw new Error(
+        `Token validation failed: ${errorData.error?.message || "Invalid token"}`
+      );
+    }
+
+    console.log("Fetching top tracks from Spotify...");
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=${timeRange}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Spotify API response status:", response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Spotify API Error Details:", errorData);
+      throw new Error(
+        `Failed to fetch top tracks: ${errorData.error?.message || response.statusText}`
+      );
+    }
+
+    const topTracks = await response.json();
+    console.log(`Found ${topTracks.items?.length || 0} tracks`);
+
+    if (!topTracks.items || topTracks.items.length === 0) {
+      throw new Error("No tracks found for the specified time range");
+    }
+
+    // Prepare track information
+    const trackSummary = topTracks.items
+      .map(
+        (track: any) =>
+          `- ${track.name} by ${track.artists[0]?.name || "Unknown Artist"}`
+      )
+      .join("\n");
+
+    const prompt = `
+	  Analyze these songs and identify the top 6 dominant vibes with percentages:
+	  ${trackSummary}
+  
+	  VIBE OPTIONS (choose ONLY these exact names):
+	  1. Chill 
+	  2. Energetic 
+	  3. Melancholy
+	  4. Romantic
+	  5. Confident
+	  6. Nostalgic
+	  7. Artsy
+	  8. Dark
+	  9. Rage
+	  10. Futuristic
+	  11. Party
+	  12. Ambient
+	  13. Spiritual
+	  14. Dreamy
+	  15. Rebellious
+	  16. Carefree
+	  17. Classy
+	  18. Cinematic
+	  19. Theatrical
+	  20. Alternative
+  
+	  RESPONSE FORMAT (must follow exactly):
+	  Chill:45, Energetic:30, Melancholy:25
+  
+	  Rules:
+	  - Only use the provided vibe names
+	  - Percentages must sum to 100
+	  - Include exactly 6 vibes
+	  - No additional text or explanation
+	  `;
+
+    console.log("Sending request to Gemini...");
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    const responseText = await result.response.text();
+    console.log("Gemini raw response:", responseText);
+
+    // Parse the response
+    const vibeDict: Record<string, number> = {};
+    const pairs = responseText.trim().split(",");
+
+    for (const pair of pairs) {
+      if (pair.includes(":")) {
+        const [vibe, percent] = pair.split(":").map((s) => s.trim());
+        if (vibe && percent && !isNaN(Number(percent))) {
+          vibeDict[vibe] = Number(percent);
+        }
+      }
+    }
+
+    // Validate response
+    if (
+      Object.keys(vibeDict).length === 6 &&
+      Object.values(vibeDict).reduce((a, b) => a + b, 0) === 100
+    ) {
+      return vibeDict;
+    } else {
+      console.warn("Invalid format from Gemini, using fallback");
+      return {
+        Chill: 0,
+        Energetic: 0,
+        Romantic: 0,
+        Nostalgic: 0,
+        Confident: 0,
+        Dreamy: 0,
+      };
+    }
+  } catch (error: any) {
+    console.error(`Error in classifyVibes: ${error.message}`);
+    console.error(error.stack);
+    return {
+      Chill: 1,
+      Energetic: 1,
+      Romantic: 1,
+      Nostalgic: 1,
+      Confident: 1,
+      Dreamy: 1,
+    };
+  }
+}
+
 const router = Router();
 
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
 /**
  *
  * @param token
@@ -561,7 +730,44 @@ router.get("/top-genres", async (req: Request, res: Response) => {
 /**
  * @route   GET /me/top-vibes
  * @desc    Returns user's music vibe classification
+ * @query   time_range: optional ("short_term", "medium_term", "long_term")
  */
-router.get("/top-vibes", async (req: Request, res: Response) => {});
+/**
+ * @route   GET /me/top-vibes
+ * @desc    Returns user's music vibe classification
+ */
+router.get("/top-vibes", async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const timeRange = (req.query.time_range as string) || "short_term";
+
+  if (!token) {
+    res.status(401).json({ error: "Missing access token" });
+    return;
+  }
+
+  if (!["short_term", "medium_term", "long_term"].includes(timeRange)) {
+    res.status(400).json({
+      error:
+        "Invalid time_range. Use 'short_term', 'medium_term', or 'long_term'.",
+    });
+    return;
+  }
+
+  try {
+    console.log(`Starting vibe analysis for time range: ${timeRange}`);
+    const vibes = await classifyVibes(token, timeRange);
+    res.json({
+      success: true,
+      vibes,
+      time_range: timeRange,
+    });
+  } catch (error: any) {
+    console.error("Top vibes endpoint error:", error.message);
+    res.status(500).json({
+      error: error.message,
+      details: error.response?.data || null,
+    });
+  }
+});
 
 export default router;
