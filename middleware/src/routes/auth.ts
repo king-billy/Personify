@@ -51,13 +51,16 @@ router.get("/callback", async (req: Request, res: Response) => {
 		}
 
 		const data = await response.json();
-		if (!data || !data.access_token) {
+		if (!data) {
 			res.send("Error: Investigate issue.");
 			return;
 		}
 
+		const { access_token, expires_in } = data;
+
 		// Redirect to frontend
-		res.redirect(`http://localhost:3000/auth/callback?access_token=${data.access_token}`);
+		const url_to_redirect = `http://localhost:3000/auth/callback?access_token=${access_token}&expires_in=${expires_in}`;
+		res.redirect(url_to_redirect);
 	} catch (err: any) {
 		console.error("Callback error:", err.message);
 		res.status(500).send("Failed to authenticate with Spotify.");

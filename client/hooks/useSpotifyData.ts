@@ -1,7 +1,7 @@
-import fetchWithToken from "@/lib/api";
+import { fetchAccess } from "@/lib/api";
 import { useEffect, useState } from "react";
 
-export function useSpotifyData<T>(endpoint: string) {
+export const useSpotifyData = <T>(endpoint: string) => {
 	const [data, setData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -9,7 +9,7 @@ export function useSpotifyData<T>(endpoint: string) {
 	useEffect(() => {
 		async function load() {
 			try {
-				const result = await fetchWithToken(endpoint);
+				const result = await fetchAccess(endpoint);
 				setData(result);
 			} catch (err: any) {
 				setError(err.message || "Error loading data");
@@ -22,4 +22,4 @@ export function useSpotifyData<T>(endpoint: string) {
 	}, [endpoint]);
 
 	return { data, loading, error };
-}
+};
