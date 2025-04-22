@@ -108,8 +108,8 @@ const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 				max: yAxisMax,
 				ticks: {
 					color: "#F7CFD8",
-					callback: function (value) {
-						return value + "%"; // Add percentage symbol to each tick label
+					callback: function (value: any) {
+						return value + "%";
 					},
 				},
 				grid: {
