@@ -74,7 +74,6 @@ const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 		.sort((a, b) => b[1] - a[1])
 		.slice(0, 5);
 
-	// Fill with empty vibes if we have less than 5
 	while (sortedEntries.length < 5) {
 		sortedEntries.push(["Unknown", 0]);
 	}
@@ -106,9 +105,12 @@ const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 		scales: {
 			y: {
 				beginAtZero: true,
-				max: 100,
+				max: yAxisMax,
 				ticks: {
 					color: "#F7CFD8",
+					callback: function (value) {
+						return value + "%"; // Add percentage symbol to each tick label
+					},
 				},
 				grid: {
 					color: "rgba(255, 255, 255, 0.1)",
