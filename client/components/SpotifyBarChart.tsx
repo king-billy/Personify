@@ -108,6 +108,7 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 	const options = {
 		indexAxis: "y" as const,
 		responsive: true,
+		maintainAspectRatio: false,
 		layout: {
 			padding: {
 				left: isGenreChart ? 0 : 60,
@@ -135,6 +136,10 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 				ticks: {
 					display: isGenreChart,
 					color: "#F7CFD8",
+					padding: isGenreChart ? 5 : 25,
+					font: {
+						size: 12,
+					},
 				},
 				grid: {
 					color: "#444",
@@ -179,7 +184,9 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 			<p className="text-center text-med text-neutral-400">No data available</p>
 		</div>
 	) : (
-		<Bar data={chartData} options={options} />
+		<div className="h-full w-full">
+			<Bar data={chartData} options={options} />
+		</div>
 	);
 };
 

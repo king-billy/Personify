@@ -8,8 +8,10 @@ export default function DashboardPage() {
 				<LandingPage />
 			</div>
 			<div id="dashboard" className="min-h-screen p-6">
-				<h1 className="text-6xl font-bold mb-6">Your Stats.</h1>
-				<VibesDashboard />
+				<div className="max-w-7xl mx-auto">
+					<h1 className="text-6xl font-bold mb-6">Your Stats.</h1>
+					<VibesDashboard />
+				</div>
 			</div>
 		</div>
 	);
