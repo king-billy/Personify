@@ -94,7 +94,7 @@ const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 				backgroundColor: backgroundColors,
 				borderColor: backgroundColors.map((color) => color.replace("0.7", "1")),
 				borderWidth: 1,
-				borderRadius: 4,
+				borderRadius: 0,
 			},
 		],
 	};

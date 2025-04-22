@@ -82,46 +82,44 @@ async function classifyVibes(
       .join("\n");
 
     const prompt = `
-	  Analyze these songs and identify the top 6 dominant vibes with percentages:
-	  ${trackSummary}
+    Analyze these songs and identify the top 5 dominant vibes with percentages:
+    ${trackSummary}
   
-	  VIBE OPTIONS (choose ONLY these exact names):
-	  1. Chill 
-	  2. Energetic 
-	  3. Melancholy
-	  4. Romantic
-	  5. Confident
-	  6. Nostalgic
-	  7. Artsy
-	  8. Dark
-	  9. Rage
-	  10. Futuristic
-	  11. Party
-	  12. Ambient
-	  13. Spiritual
-	  14. Dreamy
-	  15. Rebellious
-	  16. Carefree
-	  17. Classy
-	  18. Cinematic
-	  19. Theatrical
-	  20. Alternative
+  VIBE OPTIONS (choose ONLY these exact names):
+  1. Chill 
+  2. Energetic 
+  3. Melancholy
+  4. Romantic
+  5. Confident
+  6. Nostalgic
+  7. Artsy
+  8. Dark
+  9. Rage
+  10. Futuristic
+  11. Party
+  12. Ambient
+  13. Spiritual
+  14. Dreamy
+  15. Rebellious
+  16. Carefree
+  17. Classy
+  18. Cinematic
+  19. Theatrical
+  20. Alternative
   
-	  RESPONSE FORMAT (must follow exactly):
-	  Chill:45, Energetic:30, Melancholy:25
+  RESPONSE FORMAT (must follow exactly):
+  Chill:45, Energetic:30, Melancholy:25, Romantic:15, Confident:10
   
-	  Rules:
-	  - Only use the provided vibe names
-	  - Percentages must sum to 100
-	  - Include exactly 6 vibes
-	  - No additional text or explanation
-	  `;
+  Rules:
+  - Only use the provided vibe names
+  - Percentages must sum to 100
+  - Include exactly 5 vibes
+  - No additional text or explanation
+`;
 
-    console.log("Sending request to Gemini...");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const responseText = await result.response.text();
-    console.log("Gemini raw response:", responseText);
 
     // Parse the response
     const vibeDict: Record<string, number> = {};
@@ -138,7 +136,7 @@ async function classifyVibes(
 
     // Validate response
     if (
-      Object.keys(vibeDict).length === 6 &&
+      Object.keys(vibeDict).length === 5 &&
       Object.values(vibeDict).reduce((a, b) => a + b, 0) === 100
     ) {
       return vibeDict;
@@ -148,9 +146,8 @@ async function classifyVibes(
         Chill: 0,
         Energetic: 0,
         Romantic: 0,
-        Nostalgic: 0,
-        Confident: 0,
-        Dreamy: 0,
+        Dark: 0,
+        Cinematic: 0,
       };
     }
   } catch (error: any) {
@@ -160,9 +157,8 @@ async function classifyVibes(
       Chill: 1,
       Energetic: 1,
       Romantic: 1,
-      Nostalgic: 1,
-      Confident: 1,
-      Dreamy: 1,
+      Dark: 1,
+      Cinematic: 1,
     };
   }
 }
