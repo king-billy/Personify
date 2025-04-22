@@ -57,10 +57,34 @@ const moodDescriptions: Record<string, string> = {
 };
 
 const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
-	const sortedEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+	if (!data || Object.keys(data).length === 0) {
+		return (
+			<div className="h-full flex flex-col">
+				{title && <h3 className="text-white text-center mb-4">{title}</h3>}
+				<div className="flex-grow relative min-h-[300px]">
+					<div className="absolute inset-0 flex items-center justify-center">
+						<p className="text-neutral-400">No vibe data available</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	const sortedEntries = Object.entries(data)
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 5);
+
+	// Fill with empty vibes if we have less than 5
+	while (sortedEntries.length < 5) {
+		sortedEntries.push(["Unknown", 0]);
+	}
+
 	const labels = sortedEntries.map(([vibe]) => vibe);
 	const values = sortedEntries.map(([_, value]) => value);
 	const backgroundColors = labels.map((vibe) => moodColors[vibe] || "#999999");
+
+	const maxValue = Math.max(...values);
+	const yAxisMax = Math.min(maxValue + 5, 100);
 
 	const chartData = {
 		labels,
@@ -71,6 +95,7 @@ const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 				backgroundColor: backgroundColors,
 				borderColor: backgroundColors.map((color) => color.replace("0.7", "1")),
 				borderWidth: 1,
+				borderRadius: 4,
 			},
 		],
 	};

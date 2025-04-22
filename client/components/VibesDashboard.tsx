@@ -1,171 +1,134 @@
 "use client";
-import {
-	BarElement,
-	CategoryScale,
-	Chart as ChartJS,
-	Legend,
-	LinearScale,
-	Tooltip,
-	CoreScaleOptions,
-	Scale,
-} from "chart.js";
-import React from "react";
-import { Bar } from "react-chartjs-2";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+import SpotifyBarChart from "@/components/SpotifyBarChart";
+import TimeRangeTabs, { TimeRangeType } from "@/components/TimeRangeTabs";
+import VibesBarChart from "@/components/VibesBarChart";
+import { useSpotifyData } from "@/hooks/useSpotifyData";
+import { JSX, useState } from "react";
 
-interface BarChartProps {
-	data: Record<string, number>;
-	title?: string;
+type StatCardLabelType = "Minutes" | "Songs" | "Artists" | "Genres";
+
+interface StatCardInterface {
+	label: StatCardLabelType;
+	value: number;
 }
 
-const moodColors: Record<string, string> = {
-	Chill: "#A7C7E7",
-	Energetic: "#FFA500",
-	Melancholy: "#1E3A8A",
-	Romantic: "#FF66B2",
-	Confident: "#DC143C",
-	Nostalgic: "#704214",
-	Artsy: "#FFDB58",
-	Dark: "#36454F",
-	Rage: "#BB0A1E",
-	Futuristic: "#00FFFF",
-	Party: "#BF00FF",
-	Ambient: "#D3D3D3",
-	Spiritual: "#8A2BE2",
-	Dreamy: "#E6E6FA",
-	Rebellious: "#343434",
-	Carefree: "#87CEEB",
-	Classy: "#800020",
-	Cinematic: "#191970",
-	Theatrical: "#7851A9",
-	Alternative: "#228B22",
-};
-
-const moodDescriptions: Record<string, string> = {
-	Chill: "Relaxed, mellow, and laid-back tunes",
-	Energetic: "High-tempo, upbeat, and lively tracks",
-	Melancholy: "Thoughtful, sad, or introspective songs",
-	Romantic: "Love songs and passionate melodies",
-	Confident: "Bold, self-assured, and powerful music",
-	Nostalgic: "Music that evokes memories of the past",
-	Artsy: "Experimental or avant-garde compositions",
-	Dark: "Moody, intense, or brooding sounds",
-	Rage: "Aggressive, angry, or high-energy tracks",
-	Futuristic: "Electronic or innovative sonic landscapes",
-	Party: "Danceable and celebratory anthems",
-	Ambient: "Atmospheric and background-style music",
-	Spiritual: "Soulful or religious-inspired music",
-	Dreamy: "Ethereal, hazy, or surreal soundscapes",
-	Rebellious: "Defiant, anti-establishment, or punk vibes",
-	Carefree: "Lighthearted and joyful melodies",
-	Classy: "Sophisticated and elegant compositions",
-	Cinematic: "Music that feels like a film soundtrack",
-	Theatrical: "Dramatic and performance-oriented pieces",
-	Alternative: "Non-mainstream or indie-style music",
-};
-
-const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
-	const sortedEntries = Object.entries(data)
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, 5);
-
-	// Fill with empty vibes if we have less than 5
-	while (sortedEntries.length < 5) {
-		sortedEntries.push(["Unknown", 0]);
-	}
-
-	const labels = sortedEntries.map(([vibe]) => vibe);
-	const values = sortedEntries.map(([_, value]) => value);
-	const backgroundColors = labels.map((vibe) => moodColors[vibe] || "#999999");
-
-	// Calculate max value and add 5% buffer
-	const maxValue = Math.max(...values);
-	const yAxisMax = Math.min(maxValue + 5, 100);
-
-	const chartData = {
-		labels,
-		datasets: [
-			{
-				label: "Vibe Percentage",
-				data: values,
-				backgroundColor: backgroundColors,
-				borderColor: backgroundColors.map((color) => color.replace("0.7", "1")),
-				borderWidth: 1,
-				borderRadius: 4,
-			},
-		],
-	};
-
-	const options = {
-		responsive: true,
-		maintainAspectRatio: false,
-		scales: {
-			y: {
-				beginAtZero: true,
-				max: yAxisMax,
-				ticks: {
-					color: "#F7CFD8",
-					callback: function (this: Scale<CoreScaleOptions>, tickValue: string | number) {
-						if (typeof tickValue === "number") {
-							return `${tickValue}%`;
-						}
-						return tickValue;
-					},
-					stepSize: 10,
-				},
-				grid: {
-					color: "rgba(255, 255, 255, 0.1)",
-				},
-			},
-			x: {
-				ticks: {
-					color: "#F7CFD8",
-					font: {
-						size: 12,
-					},
-				},
-				grid: {
-					display: false,
-				},
-			},
-		},
-		plugins: {
-			legend: {
-				display: false,
-			},
-			tooltip: {
-				backgroundColor: "rgba(0, 0, 0, 0.8)",
-				titleColor: "#FFFFFF",
-				bodyColor: "#F7CFD8",
-				bodySpacing: 5,
-				padding: 12,
-				callbacks: {
-					label: function (context: any) {
-						const vibe = context.dataset.label || "";
-						const value = context.raw || 0;
-						const description = moodDescriptions[context.label] || "";
-						return [`${vibe}: ${value}%`, description];
-					},
-				},
-			},
-		},
+const StatCard = ({ label, value }: StatCardInterface): JSX.Element => {
+	const bgClassMap: Record<StatCardLabelType, string> = {
+		Minutes: "bg-pink-100",
+		Songs: "bg-yellow-100",
+		Artists: "bg-cyan-100",
+		Genres: "bg-green-100",
 	};
 
 	return (
-		<div className="h-full flex flex-col">
-			{title && <h3 className="text-white text-center mb-4">{title}</h3>}
-			<div className="flex-grow relative min-h-[300px]">
-				{labels.length > 0 ? (
-					<Bar data={chartData} options={options} />
-				) : (
-					<div className="absolute inset-0 flex items-center justify-center">
-						<p className="text-neutral-400">No vibe data available</p>
+		<div className={`${bgClassMap[label]} rounded-lg p-6 shadow-md cursor-pointer`}>
+			<p className="text-4xl font-extrabold text-black">{value}</p>
+			<p className="mt-2 text-lg text-black">
+				{label} {label === "Minutes" ? "Played" : "Listened"}
+			</p>
+		</div>
+	);
+};
+
+const VibesDashboard = (): JSX.Element => {
+	const [range, setRange] = useState<TimeRangeType>("daily");
+
+	const songCount = useSpotifyData<{ count: number }>(`/me/song-count?range=${range}`);
+	const artistCount = useSpotifyData<{ count: number }>(`/me/artist-count?range=${range}`);
+	const genreCount = useSpotifyData<{ count: number }>(`/me/genre-count?range=${range}`);
+	const minutesPlayed = useSpotifyData<{ estimated_minutes_played: number }>(`/me/minutes-played?range=${range}`);
+
+	const topArtists = useSpotifyData<{ top: { name: string; count: number }[] }>(`/me/top-artists?range=${range}`);
+	const topGenres = useSpotifyData<{ top: { genre: string; count: number }[] }>(`/me/top-genres?range=${range}`);
+
+	const vibeTimeRangeMap: Record<TimeRangeType, string> = {
+		daily: "short_term",
+		week: "short_term",
+		month: "medium_term",
+		year: "long_term",
+	};
+
+	const topVibes = useSpotifyData<{ vibes: Record<string, number> }>(
+		`/me/top-vibes?time_range=${vibeTimeRangeMap[range]}`,
+	);
+
+	const isLoading = songCount.loading || artistCount.loading || genreCount.loading || minutesPlayed.loading;
+
+	const isError =
+		songCount.error ||
+		artistCount.error ||
+		genreCount.error ||
+		minutesPlayed.error ||
+		topArtists.error ||
+		topGenres.error;
+
+	if (isLoading) {
+		return <p className="p-6 text-lg">Loading your musical stats...</p>;
+	}
+
+	if (isError) {
+		return <p className="p-6 text-lg text-red-400">Error loading your data. Please try again later.</p>;
+	}
+
+	return (
+		<div className="space-y-6">
+			<TimeRangeTabs value={range} onChange={setRange} />
+
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+				<StatCard label="Minutes" value={minutesPlayed.data?.estimated_minutes_played ?? 0} />
+				<StatCard label="Songs" value={songCount.data?.count ?? 0} />
+				<StatCard label="Artists" value={artistCount.data?.count ?? 0} />
+				<StatCard label="Genres" value={genreCount.data?.count ?? 0} />
+			</div>
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4 items-stretch">
+				<div className="col-span-2 flex flex-col space-y-6 h-full">
+					<div className="bg-neutral-800 rounded-lg p-4 h-64 flex flex-col items-center">
+						<h2 className="text-2xl font-semibold text-white mb-2 text-center">
+							Vibes Throughout The Year
+						</h2>
+						<p className="text-white text-lg">[Graph]</p>
 					</div>
-				)}
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+						<div className="bg-neutral-800 rounded-lg p-4 min-h-[200px] h-full">
+							<h2 className="text-2xl font-semibold text-white mb-2 text-center">Top Artists</h2>
+							{topArtists.data ? (
+								<SpotifyBarChart
+									data={topArtists.data.top}
+									labelKey="name"
+									bgColor="rgba(255, 99, 132, 0.6)"
+								/>
+							) : (
+								<p className="text-neutral-400 text-center text-sm">Loading...</p>
+							)}
+						</div>
+						<div className="bg-neutral-800 rounded-lg p-4 min-h-[200px] h-full">
+							<h2 className="text-2xl font-semibold text-white mb-2 text-center">Top Genres</h2>
+							{topGenres.data ? (
+								<SpotifyBarChart
+									data={topGenres.data.top}
+									labelKey="genre"
+									bgColor="rgba(75, 192, 192, 0.6)"
+								/>
+							) : (
+								<p className="text-neutral-400 text-center text-sm">Loading...</p>
+							)}
+						</div>
+					</div>
+				</div>
+				<div className="bg-neutral-800 p-4 rounded-lg flex flex-col items-center min-h-[500px] h-full">
+					<h2 className="text-2xl font-semibold text-white mb-2 text-center">Your Top Vibes</h2>
+					{topVibes.data ? (
+						<div className="w-full h-full">
+							<VibesBarChart data={topVibes.data.vibes || {}} />
+						</div>
+					) : (
+						<p className="text-neutral-400 text-center text-sm mt-10">Loading your vibes...</p>
+					)}
+				</div>
 			</div>
 		</div>
 	);
 };
 
-export default VibesBarChart;
+export default VibesDashboard;
