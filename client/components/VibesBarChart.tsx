@@ -59,7 +59,7 @@ const moodDescriptions: Record<string, string> = {
 const VibesBarChart: React.FC<BarChartProps> = ({ data, title }) => {
 	if (!data || Object.keys(data).length === 0) {
 		return (
-			<div className="h-full flex flex-col">
+			<div className="h-full flex flex-col font-inter">
 				{title && <h3 className="text-white text-center mb-4">{title}</h3>}
 				<div className="flex-grow relative min-h-[300px]">
 					<div className="absolute inset-0 flex items-center justify-center">
