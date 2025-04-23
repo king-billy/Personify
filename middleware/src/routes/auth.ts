@@ -9,10 +9,16 @@ const router = Router();
  */
 router.get("/login", (req: Request, res: Response) => {
 	const scope = SPOTIFY_SCOPES.join(" ");
+	const clientID: string = process.env.SPOTIFY_CLIENT_ID;
+
+	if (!clientID) {
+		res.status(500).send("Missing SPOTIFY_CLIENT_ID. Check your configuration!");
+		return;
+	}
 
 	const params: URLSearchParams = new URLSearchParams({
 		response_type: "code",
-		client_id: process.env.SPOTIFY_CLIENT_ID || "",
+		client_id: clientID,
 		scope: scope,
 		redirect_uri: `http://localhost:${process.env.MIDDLEWARE_PORT}/auth/callback`,
 	});
@@ -28,6 +34,11 @@ router.get("/login", (req: Request, res: Response) => {
  */
 router.get("/callback", async (req: Request, res: Response) => {
 	const code = req.query.code as string;
+
+	if (!code) {
+		res.status(400).send("Missing authorization code.");
+		return;
+	}
 
 	try {
 		const body = new URLSearchParams({
@@ -74,6 +85,11 @@ router.get("/callback", async (req: Request, res: Response) => {
 router.post("/refresh", async (req: Request, res: Response) => {
 	const { refresh_token } = req.body;
 
+	if (!refresh_token) {
+		res.status(400).send("Missing authorization refresh_token.");
+		return;
+	}
+
 	const params = new URLSearchParams({
 		grant_type: "refresh_token",
 		refresh_token,
@@ -90,7 +106,7 @@ router.post("/refresh", async (req: Request, res: Response) => {
 		});
 
 		const data = await response.json();
-		res.json(data);
+		res.status(200).json(data);
 	} catch (error) {
 		res.status(500).json({ error: "Failed to refresh token" });
 	}

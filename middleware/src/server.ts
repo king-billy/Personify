@@ -14,9 +14,19 @@ const PORT = process.env.MIDDLEWARE_PORT || 6969;
 
 app.use(cors());
 app.use(express.json());
+
+const logsDir = path.resolve(__dirname, "../logs");
+const accessLogStreamPath = path.join(logsDir, "access.log");
+
+if (!fs.existsSync(logsDir)) {
+	fs.mkdirSync(logsDir, { recursive: true });
+}
+
+const accessLogStream = fs.createWriteStream(accessLogStreamPath, { flags: "a" });
+
 app.use(
 	morgan("combined", {
-		stream: fs.createWriteStream(path.join(__dirname, "..logs/access.log"), { flags: "a" }),
+		stream: accessLogStream,
 	}),
 );
 
@@ -35,3 +45,5 @@ app.get("/", (_, res) => {
 app.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);
 });
+
+export default app;
