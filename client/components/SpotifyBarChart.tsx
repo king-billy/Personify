@@ -4,7 +4,7 @@ import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title
 import React from "react";
 import { Bar } from "react-chartjs-2";
 
-const imageCache: Record<string, HTMLImageElement> = {};
+const imageCache: Record<string, HTMLImageElement | null> = {};
 
 const imagePlugin = {
 	id: "artistImages",
@@ -12,45 +12,63 @@ const imagePlugin = {
 		const { ctx, chartArea, scales } = chart;
 		const yAxis = scales.y;
 		const customData = chart.options.plugins.customImageData;
+		const isGenreChart = chart.options.plugins.isGenreChart;
 
-		if (!ctx || !chart.config.data.labels || !customData) return;
+		if (!ctx || !chart.config.data.labels) return;
 
-		// Disable native labels
-		yAxis.ticks.display = false;
+		// Disable native labels for artist charts only
+		if (!isGenreChart) {
+			yAxis.ticks.display = false;
+		}
 
-		customData.forEach((artist: any, index: number) => {
-			if (!artist?.image || !artist?.name) return;
+		// For artist charts, draw images and names
+		if (customData && !isGenreChart) {
+			customData.forEach((artist: any, index: number) => {
+				if (!artist?.name) return;
 
-			const yPos = yAxis.getPixelForTick(index);
-			const xOffset = chartArea.left - 30; // offset by 30 pixels
+				const yPos = yAxis.getPixelForTick(index);
+				const xOffset = chartArea.left - 30;
 
-			// Draw image (cache the rendering)
-			if (!imageCache[artist.image]) {
-				const img = new Image();
-				img.src = artist.image;
-				imageCache[artist.image] = img;
-			}
+				// Draw artist name regardless of image
+				ctx.fillStyle = "#F7CFD8";
+				ctx.font = "14px sans-serif";
+				ctx.textBaseline = "middle";
+				ctx.fillText(artist.name, xOffset + 40, yPos);
 
-			const img = imageCache[artist.image];
+				// Draw image if available
+				if (artist?.image) {
+					if (!imageCache[artist.image]) {
+						const img = new Image();
+						img.crossOrigin = "anonymous";
+						img.src = artist.image;
+						imageCache[artist.image] = img;
 
-			const drawImage = () => {
-				// Final drawing logic
-				ctx.save();
-				ctx.beginPath();
-				ctx.arc(xOffset, yPos, 16, 0, Math.PI * 2); // 32x32 circle
-				ctx.clip();
-				ctx.drawImage(img, xOffset - 16, yPos - 16, 32, 32); // image left of center
-				ctx.restore();
-			};
+						img.onerror = () => {
+							// If image fails to load, mark as null to avoid retries
+							imageCache[artist.image] = null;
+							console.warn(`Failed to load image for: ${artist.name}`);
+						};
+					}
 
-			if (img.complete) drawImage();
-			else img.onload = drawImage;
+					const img = imageCache[artist.image];
 
-			ctx.fillStyle = "#F7CFD8";
-			ctx.font = "14px sans-serif";
-			ctx.textBaseline = "middle";
-			ctx.fillText(artist.name, xOffset + 40, yPos); // offset the texts by 40 pixels
-		});
+					if (img && img.complete && img.naturalHeight !== 0) {
+						// Draw circle and image
+						ctx.save();
+						ctx.beginPath();
+						ctx.arc(xOffset, yPos, 16, 0, Math.PI * 2);
+						ctx.clip();
+						ctx.drawImage(img, xOffset - 16, yPos - 16, 32, 32);
+						ctx.restore();
+					} else if (img) {
+						// Set onload handler if image is still loading
+						img.onload = () => {
+							chart.update();
+						};
+					}
+				}
+			});
+		}
 	},
 };
 
@@ -64,6 +82,7 @@ interface BarChartProps {
 	data: BarChartData[];
 	labelKey: "name" | "genre";
 	bgColor?: string;
+	title?: string;
 }
 
 /**
@@ -72,13 +91,14 @@ interface BarChartProps {
  * @returns
  */
 const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
-	const { data, labelKey, bgColor = "rgba(59, 130, 246, 0.6)" } = props;
+	const { data, labelKey, bgColor = "rgba(59, 130, 246, 0.6)", title } = props;
+	const isGenreChart = labelKey === "genre";
 
 	const chartData = {
 		labels: data.map((item) => item[labelKey] as string),
 		datasets: [
 			{
-				label: "Count",
+				label: isGenreChart ? "Genre Count" : "Artist Plays",
 				data: data.length > 0 ? data.map((item) => item.count) : [0],
 				backgroundColor: bgColor,
 			},
@@ -88,9 +108,10 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 	const options = {
 		indexAxis: "y" as const,
 		responsive: true,
+		maintainAspectRatio: false,
 		layout: {
 			padding: {
-				left: 60,
+				left: isGenreChart ? 0 : 60,
 			},
 		},
 		scales: {
@@ -102,10 +123,23 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 				grid: {
 					color: "#555",
 				},
+				title: {
+					display: true,
+					text: isGenreChart ? "Number of Artists" : "Play Count",
+					color: "#F7CFD8",
+					font: {
+						size: 14,
+					},
+				},
 			},
 			y: {
 				ticks: {
-					display: false,
+					display: isGenreChart,
+					color: "#F7CFD8",
+					padding: isGenreChart ? 5 : 25,
+					font: {
+						size: 12,
+					},
 				},
 				grid: {
 					color: "#444",
@@ -116,7 +150,32 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 			legend: {
 				display: false,
 			},
-			customImageData: labelKey === "name" ? data : null,
+			title: {
+				display: !!title,
+				text: title || "",
+				color: "#F7CFD8",
+				font: {
+					size: 16,
+				},
+				padding: {
+					top: 10,
+					bottom: 10,
+				},
+			},
+			customImageData: data,
+			isGenreChart: isGenreChart,
+			tooltip: {
+				callbacks: {
+					title: (items: any[]) => {
+						const index = items[0].dataIndex;
+						return data[index][labelKey] as string;
+					},
+					label: (item: any) => {
+						const value = item.raw;
+						return isGenreChart ? `${value} artists` : `${value} plays`;
+					},
+				},
+			},
 		},
 	};
 
@@ -125,7 +184,9 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 			<p className="text-center text-med text-neutral-400">No data available</p>
 		</div>
 	) : (
-		<Bar data={chartData} options={options} />
+		<div className="h-full w-full">
+			<Bar data={chartData} options={options} />
+		</div>
 	);
 };
 
