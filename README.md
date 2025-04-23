@@ -5,8 +5,8 @@ We aim to develop an application that provides **personalized personality insigh
 
 This repo is structured into two main folders:
 
--   [`/client`](./client): Next.js frontend that presents your music personality data.
--   [`/middleware`](./middleware): Vite + Express backend for handling Spotify authentication and API proxying.
+- [`/client`](./client): Next.js frontend that presents your music personality data.
+- [`/middleware`](./middleware): Vite + Express backend for handling Spotify authentication and API proxying.
 
 ## Project Structure
 
@@ -22,13 +22,13 @@ This repo is structured into two main folders:
 
 The middleware serves as a bridge between the frontend and the Spotify Web API. It handles:
 
--   OAuth 2.0 login flow (`/auth/login`)
--   Spotify callback handling (`/auth/callback`)
--   Token refresh logic (`/auth/refresh`)
--   Planned routes for deeper analysis:
-    -   `/top-items`
-    -   `/followed-artists`
-    -   `/followed-playlists`
+- OAuth 2.0 login flow (`/auth/login`)
+- Spotify callback handling (`/auth/callback`)
+- Token refresh logic (`/auth/refresh`)
+- Planned routes for deeper analysis:
+  - `/top-items`
+  - `/followed-artists`
+  - `/followed-playlists`
 
 Inside `/middleware`, create a `.env` file:
 
@@ -36,6 +36,8 @@ Inside `/middleware`, create a `.env` file:
 SPOTIFY_CLIENT_ID=<your_spotify_client_id>
 SPOTIFY_CLIENT_SECRET<your_spotify_client_secret>
 MIDDLEWARE_PORT=6969
+REDIRECT_URI='http://localhost:8888/callback'
+GEMINI_API_KEY=<your_gemini_api_key>
 ```
 
 > [!IMPORTANT]
@@ -49,8 +51,8 @@ MIDDLEWARE_PORT=6969
 > 4. Name your app and add a short description.
 > 5. After creating the app, you’ll be provided with:
 >
-> -   **Client ID**
-> -   **Client Secret**
+> - **Client ID**
+> - **Client Secret**
 >
 > 6. Add a **Redirect URI**, for example:
 >
@@ -76,15 +78,15 @@ The frontend is a Next.js application designed to visually represent a user's mu
 
 #### Current Features
 
--   [x] **Login with Spotify** (`/auth/login`)
--   [x] **Callback handler** to extract `access_token` and store it
--   [x] **Successful auth redirect** to `/success`
+- [x] **Login with Spotify** (`/auth/login`)
+- [x] **Callback handler** to extract `access_token` and store it
+- [x] **Successful auth redirect** to `/success`
 
 #### In Progress
 
--   [ ] Token refreshing using `/auth/refresh`
--   [ ] Fetching and displaying top artists, tracks, and genres
--   [ ] Dynamic vibes UI based on personality data
+- [ ] Token refreshing using `/auth/refresh`
+- [ ] Fetching and displaying top artists, tracks, and genres
+- [ ] Dynamic vibes UI based on personality data
 
 To run the frontend:
 

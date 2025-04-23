@@ -2,10 +2,11 @@
 
 import SpotifyBarChart from "@/components/SpotifyBarChart";
 import TimeRangeTabs, { TimeRangeType } from "@/components/TimeRangeTabs";
+import VibesBarChart from "@/components/VibesBarChart";
 import { useSpotifyData } from "@/hooks/useSpotifyData";
 import { JSX, useState } from "react";
 
-type StatCardLabelType = "Minutes" | "Songs" | "Artists" | "Genres";
+type StatCardLabelType = "Minutes Listened" | "Tracks Played" | "Artists Explored" | "Genres Discovered";
 
 interface StatCardInterface {
 	label: StatCardLabelType;
@@ -14,18 +15,16 @@ interface StatCardInterface {
 
 const StatCard = ({ label, value }: StatCardInterface): JSX.Element => {
 	const bgClassMap: Record<StatCardLabelType, string> = {
-		Minutes: "bg-pink-100",
-		Songs: "bg-yellow-100",
-		Artists: "bg-cyan-100",
-		Genres: "bg-green-100",
+		"Minutes Listened": "bg-pink-100",
+		"Tracks Played": "bg-yellow-100",
+		"Artists Explored": "bg-cyan-100",
+		"Genres Discovered": "bg-green-100",
 	};
 
 	return (
-		<div className={`${bgClassMap[label]} rounded-lg p-6 shadow-md cursor-pointer`}>
-			<p className="text-4xl font-extrabold text-black">{value}</p>
-			<p className="mt-2 text-lg text-black">
-				{label} {label === "Minutes" ? "Played" : "Listened"}
-			</p>
+		<div className={`${bgClassMap[label]} p-6 shadow-lg rounded-xl`}>
+			<p className="text-4xl font-mono font-bold text-black">{value}</p>
+			<p className="mt-2 text-lg text-black font-medium">{label}</p>
 		</div>
 	);
 };
@@ -41,6 +40,17 @@ const VibesDashboard = (): JSX.Element => {
 	const topArtists = useSpotifyData<{ top: { name: string; count: number }[] }>(`/me/top-artists?range=${range}`);
 	const topGenres = useSpotifyData<{ top: { genre: string; count: number }[] }>(`/me/top-genres?range=${range}`);
 
+	const vibeTimeRangeMap: Record<TimeRangeType, string> = {
+		daily: "short_term",
+		week: "short_term",
+		month: "medium_term",
+		year: "long_term",
+	};
+
+	const topVibes = useSpotifyData<{ vibes: Record<string, number> }>(
+		`/me/top-vibes?time_range=${vibeTimeRangeMap[range]}`,
+	);
+
 	const isLoading = songCount.loading || artistCount.loading || genreCount.loading || minutesPlayed.loading;
 
 	const isError =
@@ -52,61 +62,79 @@ const VibesDashboard = (): JSX.Element => {
 		topGenres.error;
 
 	if (isLoading) {
-		return <p className="p-6 text-lg">Loading your musical stats...</p>;
+		return <p className="p-8 text-xl">Loading your musical stats...</p>;
 	}
 
 	if (isError) {
-		return <p className="p-6 text-lg text-red-400">Error loading your data. Please try again later.</p>;
+		return <p className="p-8 text-xl text-red-400">Error loading your data. Please try again later.</p>;
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="max-w-full mx-auto">
 			<TimeRangeTabs value={range} onChange={setRange} />
 
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-				<StatCard label="Minutes" value={minutesPlayed.data?.estimated_minutes_played ?? 0} />
-				<StatCard label="Songs" value={songCount.data?.count ?? 0} />
-				<StatCard label="Artists" value={artistCount.data?.count ?? 0} />
-				<StatCard label="Genres" value={genreCount.data?.count ?? 0} />
+			{/* Stats Cards Row */}
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+				<StatCard label="Minutes Listened" value={minutesPlayed.data?.estimated_minutes_played ?? 0} />
+				<StatCard label="Tracks Played" value={songCount.data?.count ?? 0} />
+				<StatCard label="Artists Explored" value={artistCount.data?.count ?? 0} />
+				<StatCard label="Genres Discovered" value={genreCount.data?.count ?? 0} />
 			</div>
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4 items-stretch">
-				<div className="col-span-2 flex flex-col space-y-6 h-full">
-					<div className="bg-neutral-800 rounded-lg p-4 h-64 flex flex-col items-center">
-						<h2 className="text-2xl font-semibold text-white mb-2 text-center">
-							Vibes Throughout The Year
-						</h2>
-						<p className="text-white text-lg">[Graph]</p>
-					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
-						<div className="bg-neutral-800 rounded-lg p-4 min-h-[200px] h-full">
-							<h2 className="text-2xl font-semibold text-white mb-2 text-center">Top Artists</h2>
-							{topArtists.data ? (
-								<SpotifyBarChart
-									data={topArtists.data.top}
-									labelKey="name"
-									bgColor="rgba(255, 99, 132, 0.6)"
-								/>
-							) : (
-								<p className="text-neutral-400 text-center text-sm">Loading...</p>
-							)}
-						</div>
-						<div className="bg-neutral-800 rounded-lg p-4 min-h-[200px] h-full">
-							<h2 className="text-2xl font-semibold text-white mb-2 text-center">Top Genres</h2>
-							{topGenres.data ? (
-								<SpotifyBarChart
-									data={topGenres.data.top}
-									labelKey="genre"
-									bgColor="rgba(75, 192, 192, 0.6)"
-								/>
-							) : (
-								<p className="text-neutral-400 text-center text-sm">Loading...</p>
-							)}
-						</div>
+
+			<div className="mt-20"></div>
+
+			{/* Main 2x2 Chart Grid */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{/* Top Left: Vibes Throughout The Year */}
+				<div className="bg-gray-900 p-6 rounded-xl">
+					<h2 className="text-2xl font-semibold text-white mb-4">Vibes Throughout The Year</h2>
+					<div className="h-96">
+						<p className="text-white text-xl">[Graph]</p>
 					</div>
 				</div>
-				<div className="bg-neutral-800 p-4 rounded-lg flex flex-col items-center min-h-[500px] h-full">
-					<h2 className="text-2xl font-semibold text-white mb-2 text-center">Your Top Vibes</h2>
-					<p className="text-white text-lg">[Pie Chart]</p>
+
+				{/* Top Right: Top Artists */}
+				<div className="bg-gray-900 p-6 rounded-xl">
+					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Top Artists</h2>
+					<div className="h-96">
+						{topArtists.data ? (
+							<SpotifyBarChart
+								data={topArtists.data.top}
+								labelKey="name"
+								bgColor="rgba(255, 99, 132, 0.6)"
+							/>
+						) : (
+							<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
+						)}
+					</div>
+				</div>
+
+				{/* Bottom Left: Your Top Vibes */}
+				<div className="bg-gray-900 p-6 rounded-xl">
+					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Your Top Vibes</h2>
+					<div className="h-96">
+						{topVibes.data ? (
+							<VibesBarChart data={topVibes.data.vibes || {}} />
+						) : (
+							<p className="text-neutral-400 text-center text-lg mt-10">Loading your vibes...</p>
+						)}
+					</div>
+				</div>
+
+				{/* Bottom Right: Top Genres */}
+				<div className="bg-gray-900 p-6 rounded-xl">
+					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Top Genres</h2>
+					<div className="h-96">
+						{topGenres.data ? (
+							<SpotifyBarChart
+								data={topGenres.data.top}
+								labelKey="genre"
+								bgColor="rgba(75, 192, 192, 0.6)"
+							/>
+						) : (
+							<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

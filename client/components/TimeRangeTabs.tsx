@@ -11,7 +11,7 @@ const TimeRangeTabs: React.FC<TimeRangeTabsProps> = (props) => {
 	const { value, onChange } = props;
 
 	return (
-		<div className="flex gap-2 mb-4 align-center justify-flexStart mb-5">
+		<div className="flex gap-2 mb-4 align-center justify-flexStart mb-5 font-inter">
 			{RANGES.map((range) => (
 				<button
 					key={range}
