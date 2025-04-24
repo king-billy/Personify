@@ -15,10 +15,10 @@ interface StatCardInterface {
 
 const StatCard = ({ label, value }: StatCardInterface): JSX.Element => {
 	const bgClassMap: Record<StatCardLabelType, string> = {
-		"Minutes Listened": "bg-pink-100",
-		"Tracks Played": "bg-yellow-100",
-		"Artists Explored": "bg-cyan-100",
-		"Genres Discovered": "bg-green-100",
+		"Minutes Listened": "bg-pink-200",
+		"Tracks Played": "bg-yellow-200",
+		"Artists Explored": "bg-green-200",
+		"Genres Discovered": "bg-teal-300",
 	};
 
 	return (
@@ -86,7 +86,7 @@ const VibesDashboard = (): JSX.Element => {
 			{/* Main 2x2 Chart Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				{/* Top Left: Vibes Throughout The Year */}
-				<div className="bg-gray-900 p-6 rounded-xl">
+				<div className="bg-gray-900 p-6">
 					<h2 className="text-2xl font-semibold text-white mb-4">Vibes Throughout The Year</h2>
 					<div className="h-96">
 						<p className="text-white text-xl">[Graph]</p>
