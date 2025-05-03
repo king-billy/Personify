@@ -5,10 +5,10 @@ We aim to develop an application that provides **personalized personality insigh
 
 This repo is structured into two main folders:
 
-- [`/client`](./client): Next.js frontend that presents your music personality data.
-- [`/middleware`](./middleware): Vite + Express backend for handling Spotify authentication and API proxying.
+-   [`/client`](./client): Next.js frontend that presents your music personality data.
+-   [`/middleware`](./middleware): Express backend for Spotify OAuth, data processing, and Supabase (database) interactions.
 
-## Project Structure
+This repo is structured into two main folders:
 
 ```
 /
@@ -16,31 +16,65 @@ This repo is structured into two main folders:
 └── middleware/
 ```
 
+## Project Structure
+
+```
+/
+├── client/
+└── middleware/
+    └── src/
+    ├── routes/
+    │   ├── auth.ts
+    │   ├── me.ts
+    │   ├── feedback.ts
+    │   └── spotifyAuth.ts
+    ├── constants.ts
+    ├── server.ts
+    └── supabase.ts
+```
+
 ## Project Overview
 
-### `/middleware`
+The middleware serves as a bridge between the client (frontend), and Supabase and Spotify's Web API. Middleware routes includes:
 
-The middleware serves as a bridge between the frontend and the Spotify Web API. It handles:
+OAuth (`auth.ts`):
 
-- OAuth 2.0 login flow (`/auth/login`)
-- Spotify callback handling (`/auth/callback`)
-- Token refresh logic (`/auth/refresh`)
-- Planned routes for deeper analysis:
-  - `/top-items`
-  - `/followed-artists`
-  - `/followed-playlists`
+-   OAuth 2.0 login, registration flow (`/auth/login`, `/auth/register`)
+-   User's data (`/auth/me`)
 
-Inside `/middleware`, create a `.env` file:
+Spotify Web API access (`spotifyAuth.ts`):
 
-```
-SPOTIFY_CLIENT_ID=<your_spotify_client_id>
-SPOTIFY_CLIENT_SECRET<your_spotify_client_secret>
-MIDDLEWARE_PORT=6969
-REDIRECT_URI='http://localhost:8888/callback'
-GEMINI_API_KEY=<your_gemini_api_key>
-```
+-   Logging in (`/spotify-auth/login`)
+-   Spotify account's authorization (`/spotify-auth/callback`)
+-   Refresh access token (`/spotify-auth/refresh`)
+
+Spotify's User Metadata (`me.ts`)
+
+-   Spotify token validation and profile fetching
+-   Fetch and return user profile data from Supabase (e.g. personality traits, vibes summary)
+
+Feedback System (`feedback.ts`)
+
+-   Submit feedback: `POST /feedback`
+-   Fetch all feedback: `GET /feedbacks`
+-   Fetch specific feedback by ID: `GET /feedbacks/:id` where `id` is the feedback's id
+-   Comment on a given feedback: `POST /feedback/:id/comment` where `id` is the feedback's id
+-   Vote on a given feedback: `POST /feedback/:id/:voteType` where `id` is the feedback's id and `voteType` is either `upvote` or `downvote`
 
 > [!IMPORTANT]
+> To use the middleware, create a `.env` file inside `/middleware`:
+>
+> ```
+> SPOTIFY_CLIENT_ID=<your_spotify_client_id>
+> SPOTIFY_CLIENT_SECRET=<your_spotify_client_secret>
+> SPOTIFY_REDIRECT_URI=http://localhost:6969/spotify-auth/callback
+> MIDDLEWARE_PORT=6969
+> GEMINI_API_KEY=<your_gemini_api_key>
+> SUPABASE_URL=<your_supabase_project_url>
+> SUPABASE_ANON_KEY=<your_supabase_anon_key>
+> ```
+
+> [!TIP]
 > You will need an account from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) to generate the `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
 >
 > To do so,
@@ -51,16 +85,16 @@ GEMINI_API_KEY=<your_gemini_api_key>
 > 4. Name your app and add a short description.
 > 5. After creating the app, you’ll be provided with:
 >
-> - **Client ID**
-> - **Client Secret**
+> -   **Client ID**
+> -   **Client Secret**
 >
-> 6. Add a **Redirect URI**, for example:
+> 6. Add a **Redirect URI**:
 >
 > ```
->  http://localhost:6969/callback
+> http://localhost:6969/spotify-auth/callback
 > ```
 
-Then install dependencies and run the middleware:
+When all of the aforementioned steps are complete, install dependencies and run the middleware like so:
 
 ```zsh
 cd middleware
@@ -78,17 +112,19 @@ The frontend is a Next.js application designed to visually represent a user's mu
 
 #### Current Features
 
-- [x] **Login with Spotify** (`/auth/login`)
-- [x] **Callback handler** to extract `access_token` and store it
-- [x] **Successful auth redirect** to `/success`
+-   [x] **Login and register with Supabase** (`/login`)
+-   [x] Auth callback handler and token storage
+-   [x] Redirect to `/dashboard` — if and only if, after a successful login
+-   [x] Feedback posting
+    -   [x] UI for viewing all feedbacks
+    -   [x] UI for viewing specific feedback and with comment system
 
 #### In Progress
 
-- [ ] Token refreshing using `/auth/refresh`
-- [ ] Fetching and displaying top artists, tracks, and genres
-- [ ] Dynamic vibes UI based on personality data
+-   [ ] Spotify data fetching and vibes personality computation
+-   [ ] UI: dynamic visualization of musical vibes
 
-To run the frontend:
+To run the frontend, install all dependencies and start it like so:
 
 ```zsh
 cd client
@@ -104,8 +140,18 @@ Then navigate to [http://localhost:3000](http://localhost:3000)
 >
 > The OAuth redirect flow goes:
 >
-> 1.  Frontend: `/auth/login` →
-> 2.  Middleware: `/auth/login` → Spotify → `/auth/callback` →
-> 3.  Middleware redirects to frontend: `/auth/callback?access_token=...`
+> 1.  Frontend: `/login` →
+> 2.  Middleware: `/auth/login` → Supabase →
+> 3.  If successful, frontend will redirect to → `/dashboard`
 >
-> The frontend stores the access token in `localStorage` (for now) and redirects the user to `/success`.
+> Spotify Web API flow goes:
+>
+> 1. `/dashboard` page (only accessible through successful connection with Supabase)
+> 2. User initiates connection with Spotify using "Login with Spotify" button.
+> 3. Middleware: `/spotify-auth/login` → Spotify → `/spotify-auth/callback` →
+> 4. Middleware redirects to frontend: `/spotify-auth/callback?access_token=...` → `/dashboard`
+>
+> Successful connection with spotify will render `/dashboard` to showcase more content than before. This includes graphs, insights, etc.
+
+> [!NOTE]
+> Frontend stores `site_access` (Supabase) and `access_token` (Spotify) in `localStorage` (for now). If time permits, this **WILL** be handled more securely.

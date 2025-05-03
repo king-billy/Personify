@@ -1,4 +1,4 @@
-import { fetchAccess } from "@/lib/api";
+import { fetchSpotifyAccess } from "@/lib/api";
 import { useEffect, useState } from "react";
 
 export const useSpotifyData = <T>(endpoint: string) => {
@@ -7,19 +7,21 @@ export const useSpotifyData = <T>(endpoint: string) => {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		async function load() {
-			try {
-				const result = await fetchAccess(endpoint);
-				setData(result);
-			} catch (err: any) {
+		fetchSpotifyAccess(endpoint)
+			.then((res) => {
+				setData(res);
+			})
+			.catch((err) => {
 				setError(err.message || "Error loading data");
-			} finally {
+			})
+			.finally(() => {
 				setLoading(false);
-			}
-		}
-
-		load();
+			});
 	}, [endpoint]);
 
-	return { data, loading, error };
+	return {
+		data,
+		loading,
+		error,
+	};
 };

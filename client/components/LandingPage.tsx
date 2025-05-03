@@ -1,5 +1,6 @@
 "use client";
 
+import { MIDDLEWARE_PORT } from "@/lib/constants";
 import React from "react";
 
 interface FeatureGridDataInterface {
@@ -31,7 +32,13 @@ const featuresGridData: FeatureGridDataInterface[] = [
 	},
 ];
 
-const LandingPage: React.FC = () => {
+interface LandingPageInterface {
+	isSpotifyConnected: boolean;
+}
+
+const LandingPage: React.FC<LandingPageInterface> = (props) => {
+	const { isSpotifyConnected } = props;
+
 	const scrollToDashboard = () => {
 		const element = document.getElementById("dashboard");
 		if (element) {
@@ -39,8 +46,22 @@ const LandingPage: React.FC = () => {
 		}
 	};
 
+	const connectSpotify = () => {
+		window.location.href = `http://localhost:${MIDDLEWARE_PORT}/spotify-auth/login`;
+	};
+
+	const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+
+		if (isSpotifyConnected) {
+			scrollToDashboard();
+		} else {
+			connectSpotify();
+		}
+	};
+
 	return (
-		<div className="min-h-screen bg-black text-white p-6 md:p-12">
+		<div className="min-h-screen bg-black text-white p-6 md:p-6">
 			<div className="max-w-7xl mx-auto">
 				<div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-16">
 					<div className="w-full md:w-1/2">
@@ -53,15 +74,15 @@ const LandingPage: React.FC = () => {
 						</p>
 
 						<button
-							onClick={scrollToDashboard}
-							className="bg-white text-black font-light py-4 px-16 rounded-full text-2xl hover:bg-gray-200 transition-colors cursor-pointer"
+							onClick={handleButtonClick}
+							className="bg-white text-black font-light py-4 px-16 rounded-full text-xl hover:bg-gray-200 transition-colors cursor-pointer"
 						>
-							Explore
+							{isSpotifyConnected ? "Explore" : "Login with Spotify"}
 						</button>
 					</div>
 
 					{/* Some Abstract Image */}
-					<div className="w-full md:w-1/2 border-4 border-transparent relative rounded-lg overflow-hidden">
+					<div className="w-full md:w-1/2 relative rounded-lg overflow-hidden">
 						<div className="w-full h-[400px] md:h-[500px] overflow-hidden relative">
 							{/* <div className="absolute w-1 h-2 bg-white top-0 left-0"></div>
 							<div className="absolute w-1 h-2 bg-white top-0 right-0"></div>
