@@ -34,7 +34,7 @@ const TopTracks = ({ data, isLoading }: TopTracksProps) => {
 		<div className="space-y-4">
 			{data.map((track, index) => (
 				<div key={index} className="flex items-center gap-4 p-2 hover:bg-gray-800 rounded-lg transition-colors">
-					<div className="relative w-12 h-12 flex-shrink-0">
+					<div className="relative w-16 h-16 flex-shrink-0">
 						{track.image ? (
 							<Image
 								src={track.image}
