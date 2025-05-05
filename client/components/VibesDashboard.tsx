@@ -2,6 +2,7 @@
 
 import SpotifyBarChart from "@/components/SpotifyBarChart";
 import TimeRangeTabs, { TimeRangeType } from "@/components/TimeRangeTabs";
+import TopTracks from "@/components/TopTracks";
 import VibesBarChart from "@/components/VibesBarChart";
 import { useSpotifyData } from "@/hooks/useSpotifyData";
 import { JSX, useState } from "react";
@@ -22,7 +23,7 @@ const StatCard = ({ label, value }: StatCardInterface): JSX.Element => {
 	};
 
 	return (
-		<div className={`${bgClassMap[label]} p-6 shadow-lg rounded-xl`}>
+		<div className={`${bgClassMap[label]} p-6 shadow-lg rounded-xl h-36 flex flex-col justify-center`}>
 			<p className="text-4xl font-mono font-bold text-black">{value}</p>
 			<p className="mt-2 text-lg text-black font-medium">{label}</p>
 		</div>
@@ -51,7 +52,19 @@ const VibesDashboard = (): JSX.Element => {
 		`/me/top-vibes?time_range=${vibeTimeRangeMap[range]}`,
 	);
 
-	const isLoading = songCount.loading || artistCount.loading || genreCount.loading || minutesPlayed.loading;
+	const topTracks = useSpotifyData<{ tracks: { name: string; artist: string; image: string }[] }>(
+		`/me/top-tracks?time_range=${vibeTimeRangeMap[range]}`,
+	);
+
+	const isLoading =
+		songCount.loading ||
+		artistCount.loading ||
+		genreCount.loading ||
+		minutesPlayed.loading ||
+		topArtists.loading ||
+		topGenres.loading ||
+		topVibes.loading ||
+		topTracks.loading;
 
 	const isError =
 		songCount.error ||
@@ -59,7 +72,9 @@ const VibesDashboard = (): JSX.Element => {
 		genreCount.error ||
 		minutesPlayed.error ||
 		topArtists.error ||
-		topGenres.error;
+		topGenres.error ||
+		topVibes.error ||
+		topTracks.error;
 
 	if (isLoading) {
 		return <p className="p-8 text-xl">Loading your musical stats...</p>;
@@ -83,13 +98,17 @@ const VibesDashboard = (): JSX.Element => {
 
 			<div className="mt-20"></div>
 
-			{/* Main 2x2 Chart Grid */}
+			{/* Main 2x2 Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				{/* Top Left: Vibes Throughout The Year */}
-				<div className="bg-gray-900 p-6">
-					<h2 className="text-2xl font-semibold text-white mb-4">Vibes Throughout The Year</h2>
+				{/* Top Left: Top Vibes */}
+				<div className="bg-gray-900 p-6 rounded-xl">
+					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Your Top Vibes</h2>
 					<div className="h-96">
-						<p className="text-white text-xl">[Graph]</p>
+						{topVibes.data ? (
+							<VibesBarChart data={topVibes.data.vibes || {}} />
+						) : (
+							<p className="text-neutral-400 text-center text-lg mt-10">Loading your vibes...</p>
+						)}
 					</div>
 				</div>
 
@@ -109,15 +128,11 @@ const VibesDashboard = (): JSX.Element => {
 					</div>
 				</div>
 
-				{/* Bottom Left: Your Top Vibes */}
+				{/* Bottom Left: Top Tracks */}
 				<div className="bg-gray-900 p-6 rounded-xl">
-					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Your Top Vibes</h2>
-					<div className="h-96">
-						{topVibes.data ? (
-							<VibesBarChart data={topVibes.data.vibes || {}} />
-						) : (
-							<p className="text-neutral-400 text-center text-lg mt-10">Loading your vibes...</p>
-						)}
+					<h2 className="text-2xl font-semibold text-white mb-4 text-center">Top Tracks</h2>
+					<div className="h-96 overflow-y-auto">
+						<TopTracks data={topTracks.data?.tracks || []} isLoading={topTracks.loading} />
 					</div>
 				</div>
 

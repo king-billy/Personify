@@ -535,6 +535,51 @@ router.get("/genre-count", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/top-tracks", async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const timeRange = (req.query.time_range as string) || "short_term";
+  const limit = parseInt(req.query.limit as string) || 5;
+
+  if (!token) {
+    res.status(401).json({ error: "Missing access token" });
+    return;
+  }
+
+  if (!["short_term", "medium_term", "long_term"].includes(timeRange)) {
+    res.status(400).json({
+      error:
+        "Invalid time_range. Use 'short_term', 'medium_term', or 'long_term'.",
+    });
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/top/tracks?limit=${limit}&time_range=${timeRange}`,
+      {
+        headers: createAuthHeader(token),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || "Failed to fetch top tracks");
+    }
+
+    const tracks = data.items.map((track: any) => ({
+      name: track.name,
+      artist: track.artists[0]?.name || "Unknown Artist",
+      image: track.album?.images?.[0]?.url || "",
+    }));
+
+    res.json({ tracks });
+  } catch (err: any) {
+    console.error("Top tracks error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /**
  * @route   GET /me/minutes-played
  * @desc    Estimate total listening time from top tracks
