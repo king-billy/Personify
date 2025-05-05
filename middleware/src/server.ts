@@ -6,7 +6,7 @@ import meRoutes from "./routes/me";
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = process.env.MIDDLEWARE_PORT || 6969;
 
 app.use(cors());
@@ -21,9 +21,9 @@ app.use("/me", meRoutes);
 // Index — output when accessing our port directly
 // TASK: Needs better information
 app.get("/", (_, res) => {
-	res.send("Hey! Spotify Middleware is running!");
+  res.send("Hey! Spotify Middleware is running!");
 });
 
 app.listen(PORT, () => {
-	console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
