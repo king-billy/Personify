@@ -108,10 +108,13 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 	const options = {
 		indexAxis: "y" as const,
 		responsive: true,
-		maintainAspectRatio: false,
+		maintainAspectRatio: false, // This is already set correctly
 		layout: {
 			padding: {
 				left: isGenreChart ? 0 : 60,
+				right: 0,
+				top: 0,
+				bottom: 0,
 			},
 		},
 		scales: {
