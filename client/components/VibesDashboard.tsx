@@ -80,7 +80,7 @@ const VibesDashboard = (): JSX.Element => {
 
 	if (isLoading) {
 		return (
-			<div className="p-8 text-xl bg-pink-50/70 rounded-xl shadow-md max-w-6xl mx-auto mt-8">
+			<div className="p-8 text-xl rounded-xl shadow-md max-w-6xl mx-auto mt-8">
 				<p className="text-center animate-pulse">Loading your musical stats...</p>
 			</div>
 		);
@@ -88,7 +88,7 @@ const VibesDashboard = (): JSX.Element => {
 
 	if (isError) {
 		return (
-			<div className="p-8 text-xl bg-red-50/70 rounded-xl shadow-md max-w-6xl mx-auto mt-8">
+			<div className="p-8 text-xl rounded-xl shadow-md max-w-6xl mx-auto mt-8">
 				<p className="text-center text-red-500">Error loading your data. Please try again later.</p>
 			</div>
 		);
@@ -109,7 +109,7 @@ const VibesDashboard = (): JSX.Element => {
 			</div>
 
 			{/* Row 1: Top Tracks */}
-			<div className="bg-linear-to-br from-pink-400 to-yellow-200 p-6 rounded-xl shadow-lg">
+			<div className="bg-linear-to-br from-pink-300 to-yellow-200 p-6 rounded-xl shadow-lg">
 				<div className="flex flex-col md:flex-row gap-8">
 					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
 						<h2 className="text-2xl font-semibold text-white mb-6">
