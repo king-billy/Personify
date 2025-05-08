@@ -23,7 +23,9 @@ const StatCard = ({ label, value }: StatCardInterface): JSX.Element => {
 	};
 
 	return (
-		<div className={`${bgClassMap[label]} p-6 shadow-lg rounded-xl h-36 flex flex-col justify-center`}>
+		<div
+			className={`${bgClassMap[label]} p-6 shadow-lg rounded-xl h-36 flex flex-col justify-center transition-all hover:scale-[1.02]`}
+		>
 			<p className="text-4xl font-mono font-bold text-black">{value}</p>
 			<p className="mt-2 text-lg text-black font-medium">{label}</p>
 		</div>
@@ -77,125 +79,174 @@ const VibesDashboard = (): JSX.Element => {
 		topTracks.error;
 
 	if (isLoading) {
-		return <p className="p-8 text-xl">Loading your musical stats...</p>;
+		return (
+			<div className="p-8 text-xl bg-pink-50/70 rounded-xl shadow-md max-w-6xl mx-auto mt-8">
+				<p className="text-center animate-pulse">Loading your musical stats...</p>
+			</div>
+		);
 	}
 
 	if (isError) {
-		return <p className="p-8 text-xl text-red-400">Error loading your data. Please try again later.</p>;
+		return (
+			<div className="p-8 text-xl bg-red-50/70 rounded-xl shadow-md max-w-6xl mx-auto mt-8">
+				<p className="text-center text-red-500">Error loading your data. Please try again later.</p>
+			</div>
+		);
 	}
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-8">
-			<TimeRangeTabs value={range} onChange={setRange} />
+		<div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+			<div className="bg-transparent rounded-xl">
+				<TimeRangeTabs value={range} onChange={setRange} />
+			</div>
 
 			{/* Stats Cards Row */}
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 mb-16">
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 				<StatCard label="Minutes Listened" value={minutesPlayed.data?.estimated_minutes_played ?? 0} />
 				<StatCard label="Tracks Played" value={songCount.data?.count ?? 0} />
 				<StatCard label="Artists Explored" value={artistCount.data?.count ?? 0} />
 				<StatCard label="Genres Discovered" value={genreCount.data?.count ?? 0} />
 			</div>
 
-			{/* Row 1: Top Tracks - Chart on left, text on right */}
-			<div className="flex flex-col md:flex-row gap-8 mb-20">
-				<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
-					<h2 className="text-2xl font-semibold text-white mb-6">Your Top Tracks</h2>
-					<div className="h-[28rem] overflow-y-auto pr-2">
-						<TopTracks data={topTracks.data?.tracks || []} isLoading={topTracks.loading} />
+			{/* Row 1: Top Tracks */}
+			<div className="bg-white p-6 rounded-xl shadow-lg">
+				<div className="flex flex-col md:flex-row gap-8">
+					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
+						<h2 className="text-2xl font-semibold text-white mb-6">
+							Your <span className="text-pink-400">Top Tracks</span>
+						</h2>
+						<div className="h-[28rem] overflow-y-auto pr-2">
+							<TopTracks data={topTracks.data?.tracks || []} isLoading={topTracks.loading} />
+						</div>
 					</div>
-				</div>
-				<div className="md:w-1/2 flex flex-col justify-center p-6">
-					<h3 className="text-2xl font-semibold text-white mb-6">What You've Been Playing</h3>
-					<p className="text-gray-300 text-lg leading-relaxed">
-						These are the tracks you've listened to most frequently. Your top tracks reflect your current
-						musical mood and preferences. Whether it's for focus, relaxation, or pure enjoyment, these songs
-						have been on heavy rotation.
-					</p>
-					<p className="text-gray-300 text-lg mt-4 leading-relaxed">
-						The more you listen, the more accurate your musical profile becomes. Notice any patterns in when
-						you listen to certain tracks?
-					</p>
-				</div>
-			</div>
-
-			{/* Row 2: Top Artists - Text on left, chart on right */}
-			<div className="flex flex-col md:flex-row gap-8 mb-20">
-				<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
-					<h3 className="text-2xl font-semibold text-white mb-6">Your Musical Influences</h3>
-					<p className="text-gray-300 text-lg leading-relaxed">
-						These artists have dominated your listening habits. From lyrical storytellers to sonic
-						innovators, these creators have shaped your musical journey.
-					</p>
-					<p className="text-gray-300 text-lg mt-4 leading-relaxed">
-						The more you listen, the more your artist preferences evolve. Do you see any favorites emerging?
-					</p>
-				</div>
-				<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl order-1 md:order-2">
-					<h2 className="text-2xl font-semibold text-white mb-6">Top Artists</h2>
-					<div className="h-[28rem]">
-						{topArtists.data ? (
-							<SpotifyBarChart
-								data={topArtists.data.top}
-								labelKey="name"
-								bgColor="rgba(255, 99, 132, 0.6)"
-							/>
-						) : (
-							<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
-						)}
+					<div className="md:w-1/2 flex flex-col justify-center p-6">
+						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
+							What You've Been <span className="text-pink-500">Playing</span>
+						</h3>
+						<p className="text-gray-700 text-lg leading-relaxed">
+							These are the{" "}
+							<span className="font-bold text-gray-900">tracks you've listened to most frequently</span>.
+							Your top tracks reflect your current musical mood and preferences. Whether it's for{" "}
+							<span className="text-blue-600">focus</span>,{" "}
+							<span className="text-green-600">relaxation</span>, or pure{" "}
+							<span className="text-purple-600">enjoyment</span>, these songs have been on{" "}
+							<span className="font-bold">heavy rotation</span>.
+						</p>
+						<p className="text-gray-700 text-lg mt-4 leading-relaxed">
+							The more you listen, the more <span className="italic">accurate</span> your musical profile
+							becomes. <span className="underline decoration-yellow-400">Notice any patterns</span> in
+							when you listen to certain tracks?
+						</p>
 					</div>
 				</div>
 			</div>
 
-			{/* Row 3: Top Genres - Chart on left, text on right */}
-			<div className="flex flex-col md:flex-row gap-8 mb-20">
-				<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
-					<h2 className="text-2xl font-semibold text-white mb-6">Top Genres</h2>
-					<div className="h-[28rem]">
-						{topGenres.data ? (
-							<SpotifyBarChart
-								data={topGenres.data.top}
-								labelKey="genre"
-								bgColor="rgba(75, 192, 192, 0.6)"
-							/>
-						) : (
-							<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
-						)}
+			{/* Row 2: Top Artists */}
+			<div className="bg-white p-6 rounded-xl shadow-lg">
+				<div className="flex flex-col md:flex-row gap-8">
+					<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
+						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
+							Your <span className="text-green-600">Musical Influences</span>
+						</h3>
+						<p className="text-gray-700 text-lg leading-relaxed">
+							These <span className="font-bold">artists have dominated</span> your listening habits. From{" "}
+							<span className="text-purple-600">lyrical storytellers</span> to{" "}
+							<span className="text-blue-500">sonic innovators</span>, these creators have shaped your{" "}
+							<span className="italic">musical journey</span>.
+						</p>
+						<p className="text-gray-700 text-lg mt-4 leading-relaxed">
+							The more you listen, the more your artist preferences{" "}
+							<span className="font-bold">evolve</span>.{" "}
+							<span className="underline decoration-pink-400">Do you see any favorites emerging</span>?
+						</p>
 					</div>
-				</div>
-				<div className="md:w-1/2 flex flex-col justify-center p-6">
-					<h3 className="text-2xl font-semibold text-white mb-6">Your Sonic Palette</h3>
-					<p className="text-gray-300 text-lg leading-relaxed">
-						These genres define your musical taste. Whether you're drawn to the raw energy of rock, the
-						intricate rhythms of hip-hop, or the emotional depth of classical.
-					</p>
-					<p className="text-gray-300 text-lg mt-4 leading-relaxed">
-						Your genre preferences reveal the colors of your personal soundscape. How diverse is your
-						palette?
-					</p>
+					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl order-1 md:order-2">
+						<h2 className="text-2xl font-semibold text-white mb-6">
+							Top <span className="text-red-400">Artists</span>
+						</h2>
+						<div className="h-[28rem]">
+							{topArtists.data ? (
+								<SpotifyBarChart
+									data={topArtists.data.top}
+									labelKey="name"
+									bgColor="rgba(255, 99, 132, 0.6)"
+								/>
+							) : (
+								<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
+							)}
+						</div>
+					</div>
 				</div>
 			</div>
 
-			{/* Row 4: Top Vibes - Text on left, chart on right */}
-			<div className="flex flex-col md:flex-row gap-8 mb-20">
-				<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
-					<h3 className="text-2xl font-semibold text-white mb-6">Your Musical Mood</h3>
-					<p className="text-gray-300 text-lg leading-relaxed">
-						These vibes capture the emotional essence of your listening habits. From energetic to
-						melancholic, your vibe distribution shows how you use music to complement or alter your
-						emotional state.
-					</p>
-					<p className="text-gray-300 text-lg mt-4 leading-relaxed">
-						Notice any patterns in when you prefer certain vibes? Your musical mood tells a story about you.
-					</p>
+			{/* Row 3: Top Genres */}
+			<div className="bg-white p-6 rounded-xl shadow-lg">
+				<div className="flex flex-col md:flex-row gap-8">
+					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
+						<h2 className="text-2xl font-semibold text-white mb-6">
+							Top <span className="text-teal-300">Genres</span>
+						</h2>
+						<div className="h-[28rem]">
+							{topGenres.data ? (
+								<SpotifyBarChart
+									data={topGenres.data.top}
+									labelKey="genre"
+									bgColor="rgba(75, 192, 192, 0.6)"
+								/>
+							) : (
+								<p className="text-neutral-400 text-center text-lg mt-10">Loading...</p>
+							)}
+						</div>
+					</div>
+					<div className="md:w-1/2 flex flex-col justify-center p-6">
+						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
+							Your <span className="text-teal-500">Sonic Palette</span>
+						</h3>
+						<p className="text-gray-700 text-lg leading-relaxed">
+							These <span className="font-bold">genres define</span> your musical taste. Whether you're
+							drawn to the <span className="text-red-500">raw energy of rock</span>, the
+							<span className="text-yellow-600"> intricate rhythms of hip-hop</span>, or the{" "}
+							<span className="text-blue-400">emotional depth of classical</span>.
+						</p>
+						<p className="text-gray-700 text-lg mt-4 leading-relaxed">
+							Your genre preferences reveal the{" "}
+							<span className="italic">colors of your personal soundscape</span>.{" "}
+							<span className="underline decoration-green-400">How diverse is your palette</span>?
+						</p>
+					</div>
 				</div>
-				<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl order-1 md:order-2">
-					<h2 className="text-2xl font-semibold text-white mb-6">Top Vibes</h2>
-					<div className="h-[28rem]">
-						{topVibes.data ? (
-							<VibesTreeMap data={topVibes.data.vibes || {}} />
-						) : (
-							<p className="text-neutral-400 text-center text-lg mt-10">Loading your vibes...</p>
-						)}
+			</div>
+
+			{/* Row 4: Top Vibes */}
+			<div className="bg-white p-6 rounded-xl shadow-lg">
+				<div className="flex flex-col md:flex-row gap-8">
+					<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
+						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
+							Your <span className="text-purple-600">Musical Mood</span>
+						</h3>
+						<p className="text-gray-700 text-lg leading-relaxed">
+							These <span className="font-bold">vibes capture</span> the emotional essence of your
+							listening habits. From <span className="text-yellow-500">energetic</span> to
+							<span className="text-blue-300"> melancholic</span>, your vibe distribution shows how you
+							use music to <span className="italic">complement or alter</span> your emotional state.
+						</p>
+						<p className="text-gray-700 text-lg mt-4 leading-relaxed">
+							<span className="underline decoration-purple-400">Notice any patterns</span> in when you
+							prefer certain vibes? Your musical mood tells a{" "}
+							<span className="font-bold">story about you</span>.
+						</p>
+					</div>
+					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl order-1 md:order-2">
+						<h2 className="text-2xl font-semibold text-white mb-6">
+							Top <span className="text-indigo-400">Vibes</span>
+						</h2>
+						<div className="h-[28rem]">
+							{topVibes.data ? (
+								<VibesTreeMap data={topVibes.data.vibes || {}} />
+							) : (
+								<p className="text-neutral-400 text-center text-lg mt-10">Loading your vibes...</p>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

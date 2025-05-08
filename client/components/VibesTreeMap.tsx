@@ -26,26 +26,26 @@ interface TreeMapNode {
 }
 
 const moodColors: Record<string, string> = {
-	Chill: "#A7C7E7",
-	Energetic: "#FFA500",
-	Melancholy: "#1E3A8A",
-	Romantic: "#FF66B2",
-	Confident: "#DC143C",
-	Nostalgic: "#704214",
-	Artsy: "#FFDB58",
-	Dark: "#36454F",
-	Rage: "#BB0A1E",
-	Futuristic: "#00FFFF",
-	Party: "#BF00FF",
-	Ambient: "#D3D3D3",
-	Spiritual: "#8A2BE2",
-	Dreamy: "#E6E6FA",
-	Rebellious: "#343434",
-	Carefree: "#87CEEB",
-	Classy: "#800020",
-	Cinematic: "#191970",
-	Theatrical: "#7851A9",
-	Alternative: "#228B22",
+	Chill: "rgba(42, 120, 142, 0.7)",
+	Energetic: "rgba(240, 249, 33, 0.7)",
+	Melancholy: "rgba(65, 68, 135, 0.7)",
+	Romantic: "rgba(140, 41, 129, 0.7)",
+	Confident: "rgba(225, 100, 98, 0.7)",
+	Nostalgic: "rgba(126, 3, 168, 0.7)",
+	Artsy: "rgba(248, 149, 64, 0.7)",
+	Dark: "rgba(13, 8, 135, 0.7)",
+	Rage: "rgba(252, 206, 37, 0.7)",
+	Futuristic: "rgba(59, 4, 154, 0.7)",
+	Party: "rgba(237, 121, 83, 0.7)",
+	Ambient: "rgba(92, 1, 166, 0.7)",
+	Spiritual: "rgba(106, 0, 168, 0.7)",
+	Dreamy: "rgba(183, 55, 121, 0.7)",
+	Rebellious: "rgba(219, 91, 104, 0.7)",
+	Carefree: "rgba(244, 136, 73, 0.7)",
+	Classy: "rgba(156, 23, 158, 0.7)",
+	Cinematic: "rgba(45, 17, 154, 0.7)",
+	Theatrical: "rgba(204, 71, 120, 0.7)",
+	Alternative: "rgba(240, 249, 33, 0.7)",
 };
 
 const moodDescriptions: Record<string, string> = {
@@ -72,36 +72,44 @@ const moodDescriptions: Record<string, string> = {
 };
 
 const VibesTreeMap: React.FC<TreeMapProps> = ({ data, title }) => {
-	// Prepare data for Nivo Treemap format
-	const transformDataForNivo = (): TreeMapRoot => {
-		if (!data || Object.keys(data).length === 0) {
-			// Nivo needs a root node structure even if empty
-			return { name: "Vibes", children: [] };
+	const getTextColor = (bgColor: string): string => {
+		if (!bgColor) return "#000000";
+
+		// Handle rgba format
+		const rgbaMatch = bgColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)$/i);
+		if (rgbaMatch) {
+			const r = parseInt(rgbaMatch[1]);
+			const g = parseInt(rgbaMatch[2]);
+			const b = parseInt(rgbaMatch[3]);
+			const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+			return luminance > 0.5 ? "#000000" : "#ffffff";
 		}
 
-		const processedData = Object.entries(data)
+		return "#000000"; // Default fallback
+	};
+
+	// Prepare data for Nivo Treemap format
+	const transformDataForNivo = () => {
+		if (!data || Object.keys(data).length === 0) {
+			return [];
+		}
+
+		return Object.entries(data)
 			.sort((a, b) => b[1] - a[1])
-			.slice(0, 15) // Show top 15 vibes
+			.slice(0, 15)
 			.map(([vibe, value]) => ({
 				name: vibe,
 				value: value,
-				color: moodColors[vibe] || "#999999",
+				color: moodColors[vibe] || "rgba(153, 153, 153, 0.7)",
 				description: moodDescriptions[vibe] || "No description available.",
 			}));
-
-		return {
-			name: "Vibes", // Root node for the treemap
-			children: processedData,
-		};
 	};
 
-	const nivoData = transformDataForNivo();
-
-	// Calculate total value for percentage calculation in tooltip
-	const totalValue = nivoData.children.reduce((sum, item) => sum + item.value, 0);
+	const nodesData = transformDataForNivo();
+	const totalValue = nodesData.reduce((sum, item) => sum + item.value, 0);
 
 	// Empty state handling
-	if (!nivoData.children || nivoData.children.length === 0) {
+	if (!nodesData || nodesData.length === 0) {
 		return (
 			<div className="h-full flex flex-col font-inter">
 				{title && <h3 className="text-white text-center mb-4 text-xl font-semibold">{title}</h3>}
@@ -114,27 +122,20 @@ const VibesTreeMap: React.FC<TreeMapProps> = ({ data, title }) => {
 
 	// Tooltip
 	const CustomTooltip = ({ node }: { node: TreeMapNode }) => {
-		// Calculate percentage
 		const percentage = ((node.value / totalValue) * 100).toFixed(1);
-
 		return (
-			<div
-				style={{
-					backgroundColor: "rgba(0, 0, 0, 0.8)",
-					color: "#fff",
-					padding: "10px 15px",
-					borderRadius: "3px",
-					boxShadow: "0 2px 5px rgba(0,0,0,0.3)",
-				}}
-				className="font-inter text-sm"
-			>
-				<strong style={{ color: node.data.color }}>{node.data.name}</strong>
-				<br />
-				Value: {node.value.toLocaleString()}
-				<br />
-				Percentage: {percentage}%
-				<br />
-				<span className="text-xs text-neutral-300">{node.data.description}</span>
+			<div className="bg-gray-900/95 backdrop-blur-sm text-white p-4 rounded-lg shadow-xl border border-white/20 font-inter max-w-[220px]">
+				<div className="flex items-center gap-2 mb-2">
+					<div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: node.data.color }} />
+					<h3 className="text-base font-bold" style={{ color: node.data.color }}>
+						{node.data.name}
+					</h3>
+				</div>
+				<div className="text-sm mb-1">
+					<span className="text-white/70">Share: </span>
+					<span className="font-semibold">{percentage}%</span>
+				</div>
+				<p className="text-xs text-white/60 mt-2 leading-tight">{node.data.description}</p>
 			</div>
 		);
 	};
@@ -144,27 +145,40 @@ const VibesTreeMap: React.FC<TreeMapProps> = ({ data, title }) => {
 			{title && <h3 className="text-white text-center mb-4 text-xl font-semibold">{title}</h3>}
 			<div className="flex-grow relative w-full h-full min-h-[300px] lg:min-h-[400px]">
 				<ResponsiveTreeMap
-					data={nivoData}
+					data={{
+						// Create a dummy root with our actual nodes as children
+						name: "root",
+						children: nodesData,
+					}}
 					identity="name"
 					value="value"
 					valueFormat=".0s"
 					margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
 					label={(node) => `${node.id}`}
-					labelSkipSize={18}
-					labelTextColor={{ from: "color", modifiers: [["darker", 2.5]] }}
-					parentLabelPosition="left"
+					labelSkipSize={12}
+					labelTextColor={(node) => getTextColor(node.data.color)}
 					parentLabelTextColor={{ from: "color", modifiers: [["darker", 2]] }}
-					parentLabelPadding={5}
 					colors={(node) => node.data.color}
 					borderWidth={1}
 					borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
 					tooltip={CustomTooltip}
-					nodeOpacity={0.85}
+					nodeOpacity={1}
 					tile="squarify"
 					innerPadding={3}
 					outerPadding={3}
 					animate={true}
 					motionConfig="gentle"
+					theme={{
+						labels: {
+							text: {
+								fontSize: 14,
+								fontWeight: 600,
+							},
+						},
+					}}
+					// These prevent the root node from being rendered
+					enableParentLabel={false}
+					leavesOnly={true}
 				/>
 			</div>
 		</div>
