@@ -109,7 +109,7 @@ const VibesDashboard = (): JSX.Element => {
 			</div>
 
 			{/* Row 1: Top Tracks */}
-			<div className="bg-white p-6 rounded-xl shadow-lg">
+			<div className="bg-linear-to-br from-pink-400 to-yellow-200 p-6 rounded-xl shadow-lg">
 				<div className="flex flex-col md:flex-row gap-8">
 					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
 						<h2 className="text-2xl font-semibold text-white mb-6">
@@ -142,11 +142,11 @@ const VibesDashboard = (): JSX.Element => {
 			</div>
 
 			{/* Row 2: Top Artists */}
-			<div className="bg-white p-6 rounded-xl shadow-lg">
+			<div className="bg-linear-to-br from-yellow-200 to-green-300 p-6 rounded-xl shadow-lg">
 				<div className="flex flex-col md:flex-row gap-8">
 					<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
 						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
-							Your <span className="text-green-600">Musical Influences</span>
+							Your <span className="text-pink-600">Musical Influences</span>
 						</h3>
 						<p className="text-gray-700 text-lg leading-relaxed">
 							These <span className="font-bold">artists have dominated</span> your listening habits. From{" "}
@@ -180,7 +180,7 @@ const VibesDashboard = (): JSX.Element => {
 			</div>
 
 			{/* Row 3: Top Genres */}
-			<div className="bg-white p-6 rounded-xl shadow-lg">
+			<div className="bg-linear-to-br from-green-300 to-teal-300 p-6 rounded-xl shadow-lg">
 				<div className="flex flex-col md:flex-row gap-8">
 					<div className="md:w-1/2 bg-gray-900 p-6 rounded-xl">
 						<h2 className="text-2xl font-semibold text-white mb-6">
@@ -200,12 +200,12 @@ const VibesDashboard = (): JSX.Element => {
 					</div>
 					<div className="md:w-1/2 flex flex-col justify-center p-6">
 						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
-							Your <span className="text-teal-500">Sonic Palette</span>
+							Your <span className="text-teal-700">Sonic Palette</span>
 						</h3>
 						<p className="text-gray-700 text-lg leading-relaxed">
 							These <span className="font-bold">genres define</span> your musical taste. Whether you're
 							drawn to the <span className="text-red-500">raw energy of rock</span>, the
-							<span className="text-yellow-600"> intricate rhythms of hip-hop</span>, or the{" "}
+							<span className="text-purple-600"> intricate rhythms of hip-hop</span>, or the{" "}
 							<span className="text-blue-400">emotional depth of classical</span>.
 						</p>
 						<p className="text-gray-700 text-lg mt-4 leading-relaxed">
@@ -218,7 +218,7 @@ const VibesDashboard = (): JSX.Element => {
 			</div>
 
 			{/* Row 4: Top Vibes */}
-			<div className="bg-white p-6 rounded-xl shadow-lg">
+			<div className="bg-linear-to-br from-teal-300 to-pink-400 p-6 rounded-xl shadow-lg">
 				<div className="flex flex-col md:flex-row gap-8">
 					<div className="md:w-1/2 flex flex-col justify-center p-6 order-2 md:order-1">
 						<h3 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -226,8 +226,8 @@ const VibesDashboard = (): JSX.Element => {
 						</h3>
 						<p className="text-gray-700 text-lg leading-relaxed">
 							These <span className="font-bold">vibes capture</span> the emotional essence of your
-							listening habits. From <span className="text-yellow-500">energetic</span> to
-							<span className="text-blue-300"> melancholic</span>, your vibe distribution shows how you
+							listening habits. From <span className="text-blue-600">energetic</span> to
+							<span className="text-purple-600"> melancholic</span>, your vibe distribution shows how you
 							use music to <span className="italic">complement or alter</span> your emotional state.
 						</p>
 						<p className="text-gray-700 text-lg mt-4 leading-relaxed">

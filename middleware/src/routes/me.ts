@@ -82,7 +82,7 @@ async function classifyVibes(
       .join("\n");
 
     const prompt = `
-    Analyze these songs and identify the top 5 dominant vibes with percentages:
+    Analyze these songs and identify the top 10 dominant vibes with percentages:
     ${trackSummary}
   
   VIBE OPTIONS (choose ONLY these exact names):
@@ -108,12 +108,12 @@ async function classifyVibes(
   20. Alternative
   
   RESPONSE FORMAT (must follow exactly):
-  Chill:45, Energetic:30, Melancholy:25, Romantic:15, Confident:10
+  Chill:25, Energetic:20, Melancholy:15, Romantic:10, Confident:8, Nostalgic:7, Artsy:6, Dark:5, Rage:3, Futuristic:1
   
   Rules:
   - Only use the provided vibe names
   - Percentages must sum to 100
-  - Include exactly 5 vibes
+  - Include exactly 10 vibes
   - No additional text or explanation
 `;
 
@@ -136,29 +136,39 @@ async function classifyVibes(
 
     // Validate response
     if (
-      Object.keys(vibeDict).length === 5 &&
+      Object.keys(vibeDict).length === 10 &&
       Object.values(vibeDict).reduce((a, b) => a + b, 0) === 100
     ) {
       return vibeDict;
     } else {
       console.warn("Invalid format from Gemini, using fallback");
       return {
-        Chill: 0,
-        Energetic: 0,
-        Romantic: 0,
-        Dark: 0,
-        Cinematic: 0,
+        Chill: 15,
+        Energetic: 15,
+        Romantic: 10,
+        Dark: 10,
+        Cinematic: 10,
+        Melancholy: 10,
+        Confident: 10,
+        Nostalgic: 10,
+        Artsy: 5,
+        Futuristic: 5,
       };
     }
   } catch (error: any) {
     console.error(`Error in classifyVibes: ${error.message}`);
     console.error(error.stack);
     return {
-      Chill: 1,
-      Energetic: 1,
-      Romantic: 1,
-      Dark: 1,
-      Cinematic: 1,
+      Chill: 10,
+      Energetic: 10,
+      Romantic: 10,
+      Dark: 10,
+      Cinematic: 10,
+      Melancholy: 10,
+      Confident: 10,
+      Nostalgic: 10,
+      Artsy: 10,
+      Futuristic: 10,
     };
   }
 }
@@ -538,7 +548,7 @@ router.get("/genre-count", async (req: Request, res: Response) => {
 router.get("/top-tracks", async (req: Request, res: Response) => {
   const token = req.headers.authorization?.split(" ")[1];
   const timeRange = (req.query.time_range as string) || "short_term";
-  const limit = parseInt(req.query.limit as string) || 5;
+  const limit = parseInt(req.query.limit as string) || 10;
 
   if (!token) {
     res.status(401).json({ error: "Missing access token" });
