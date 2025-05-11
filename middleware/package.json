@@ -4,23 +4,31 @@
 	"description": "",
 	"main": "src/server.ts",
 	"scripts": {
-		"dev": "nodemon"
+		"dev": "nodemon",
+		"watch_test": "npx vitest --watch"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@google/generative-ai": "^0.24.0",
+		"@supabase/supabase-js": "^2.49.4",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.7",
-		"express": "^5.1.0"
+		"express": "^5.1.0",
+		"morgan": "^1.10.0"
 	},
 	"devDependencies": {
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.1",
+		"@types/morgan": "^1.9.9",
 		"@types/node": "^22.14.0",
+		"@types/supertest": "^6.0.3",
 		"nodemon": "^3.1.9",
 		"prettier": "^3.5.3",
+		"supertest": "^7.1.0",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.2"
 	}
 }

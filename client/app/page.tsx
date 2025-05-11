@@ -1,10 +1,10 @@
 "use client";
-import LoginSection from "@/components/LoginSection";
+import LoginButtonHomePage from "@/components/LoginButtonHomePage";
 import Image from "next/image";
 
 const cards = Array(9).fill(null);
 
-export default function Home() {
+const Home = () => {
 	return (
 		<div className="min-h-screen flex flex-col">
 			<main className="flex flex-col md:flex-row flex-1 p-4 sm:p-6 md:p-8 lg:p-10">
@@ -40,7 +40,7 @@ export default function Home() {
 							className="mt-4 md:mt-6 lg:mt-8
                             flex justify-center md:justify-start"
 						>
-							<LoginSection />
+							<LoginButtonHomePage />
 						</div>
 					</div>
 				</div>
@@ -106,4 +106,6 @@ export default function Home() {
 			</main>
 		</div>
 	);
-}
+};
+
+export default Home;

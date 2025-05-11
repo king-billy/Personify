@@ -1,99 +1,125 @@
-import { Request, Response, Router } from "express";
-import { SPOTIFY_SCOPES } from "../constants";
+import { Router } from "express";
+import { supabase } from "../supabase";
 
-const router = Router();
+const authRouter = Router();
 
 /**
- * @route   GET /auth/login
- * @desc    Redirects the user to Spotify's authorization page to start OAuth flow
+ * Register route with Supabase
  */
-router.get("/login", (req: Request, res: Response) => {
-	const scope = SPOTIFY_SCOPES.join(" ");
+authRouter.post("/register", async (req, res) => {
+	const { email, password } = req.body;
 
-	const params: URLSearchParams = new URLSearchParams({
-		response_type: "code",
-		client_id: process.env.SPOTIFY_CLIENT_ID || "",
-		scope: scope,
-		redirect_uri: `http://localhost:${process.env.MIDDLEWARE_PORT}/auth/callback`,
+	const { data, error } = await supabase.auth.signUp({
+		email,
+		password,
 	});
 
-	// Redirect user to Spotify's authorization URL
-	res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
+	if (error) {
+		res.status(400).json({ error: error.message });
+		return;
+	}
+
+	res.status(200).json({
+		message: "Registration successful",
+		data,
+	});
 });
 
 /**
- * @route   GET /auth/callback
- * @desc    Handles Spotify redirect after user authorizes the app.
- * 			Exchanges authorization code for access and refresh tokens
+ * Login route with Supabase
  */
-router.get("/callback", async (req: Request, res: Response) => {
-	const code = req.query.code as string;
+authRouter.post("/login", async (req, res) => {
+	const { email, password } = req.body;
 
-	try {
-		const body = new URLSearchParams({
-			grant_type: "authorization_code",
-			code,
-			redirect_uri: process.env.REDIRECT_URI ?? `http://localhost:${process.env.MIDDLEWARE_PORT}/auth/callback`,
+	const { data, error } = await supabase.auth.signInWithPassword({
+		email,
+		password,
+	});
+
+	if (error || !data.user) {
+		res.status(400).json({ error: error?.message || "Login failed" });
+		return;
+	}
+
+	const { id: uid, email: userEmail, user_metadata } = data.user;
+	const displayName = user_metadata?.full_name ?? null;
+
+	// Insert into users table only if not already there
+	const { data: existingUser, error: userCheckError } = await supabase.from("users").select("user_id").eq("user_id", uid).single();
+
+	if (userCheckError && userCheckError.code !== "PGRST116") {
+		console.error("Error checking existing user:", userCheckError.message);
+		res.status(500).json({ error: "Failed to check user profile" });
+		return;
+	}
+
+	if (!existingUser) {
+		const { error: insertError } = await supabase.from("users").insert({
+			user_id: uid,
+			email: userEmail,
+			display_name: displayName,
 		});
 
-		const response = await fetch("https://accounts.spotify.com/api/token", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: "Basic " + Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString("base64"),
-			},
-			body,
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Spotify token error: ${errorText}`);
-		}
-
-		const data = await response.json();
-		if (!data) {
-			res.send("Error: Investigate issue.");
+		if (insertError) {
+			console.error("Error inserting user profile:", insertError.message);
+			res.status(500).json({ error: "Failed to create user profile" });
 			return;
 		}
-
-		const { access_token, expires_in } = data;
-
-		// Redirect to frontend
-		const url_to_redirect = `http://localhost:3000/auth/callback?access_token=${access_token}&expires_in=${expires_in}`;
-		res.redirect(url_to_redirect);
-	} catch (err: any) {
-		console.error("Callback error:", err.message);
-		res.status(500).send("Failed to authenticate with Spotify.");
 	}
+
+	res.status(200).json({
+		message: "Login successful",
+		data,
+	});
 });
 
 /**
- * @route   POST /auth/refresh
- * @desc    Refreshes access token using a valid refresh token
+ * Get currently logged-in user info
  */
-router.post("/refresh", async (req: Request, res: Response) => {
-	const { refresh_token } = req.body;
+authRouter.get("/me", async (req, res) => {
+	const authHeader = req.headers.authorization;
 
-	const params = new URLSearchParams({
-		grant_type: "refresh_token",
-		refresh_token,
-	});
-
-	try {
-		const response = await fetch("https://accounts.spotify.com/api/token", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: "Basic " + Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString("base64"),
-			},
-			body: params,
+	if (!authHeader) {
+		res.status(401).json({
+			error: "Missing Authorization header",
 		});
 
-		const data = await response.json();
-		res.json(data);
-	} catch (error) {
-		res.status(500).json({ error: "Failed to refresh token" });
+		return;
 	}
+
+	const token = authHeader.split(" ")[1]; // "Bearer <token>"
+
+	const { data, error } = await supabase.auth.getUser(token);
+
+	if (error || !data?.user) {
+		res.status(401).json({
+			error: "Invalid or expired token",
+		});
+
+		return;
+	}
+
+	res.status(200).json({
+		message: "User fetched successfully",
+		user: data.user,
+	});
 });
 
-export default router;
+/**
+ * Get user based on id
+ */
+authRouter.get("/getUser/:id", async (req, res) => {
+	const { id } = req.params;
+
+	const { data, error } = await supabase.from("users").select("user_id, email, display_name").eq("user_id", id).single();
+
+	if (error) {
+		console.error("Error fetching user:", error.message);
+		res.status(404).json({ error: "User not found" });
+		return;
+	}
+
+	res.status(200).json({ user: data });
+});
+
+export default authRouter;

@@ -1,10 +1,8 @@
 "use client";
 
-import { MIDDLEWARE_PORT } from "@/lib/constants";
-
-export default function LoginSection() {
+const LoginButtonHomePage = () => {
 	const handleLoginClick = () => {
-		window.location.href = `http://localhost:${MIDDLEWARE_PORT}/auth/login`;
+		window.location.href = `/login`;
 	};
 
 	return (
@@ -13,8 +11,10 @@ export default function LoginSection() {
 				onClick={handleLoginClick}
 				className="bg-white text-black py-3 px-12 rounded-full font-large font-inter text-2xl hover:bg-gray-300 transition cursor-pointer"
 			>
-				Login with Spotify
+				Login
 			</button>
 		</div>
 	);
-}
+};
+
+export default LoginButtonHomePage;
