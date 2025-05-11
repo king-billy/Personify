@@ -57,7 +57,7 @@ const DashboardPage = () => {
 			{isSpotifyConnected && (
 				<div id="dashboard" className="min-h-screen p-6">
 					<div className="max-w-7xl mx-auto">
-						<h1 className="text-6xl font-bold mb-6">Your Stats.</h1>
+						<h1 className="text-6xl font-bold mb-6 max-w-6xl mx-auto">Your Stats.</h1>
 						<VibesDashboard />
 					</div>
 				</div>

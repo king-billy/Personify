@@ -19,7 +19,7 @@ const Home = () => {
                           text-center md:text-left"
 					>
 						<h1
-							className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl 
+							className="text-5xl sm:text-5xl md:text-6xl lg:text-10xl 
                           xl:text-7xl font-bold text-[#F7CFD8] leading-normal
                          transition-transform font-inter
                          pt-8 md:pt-0"
@@ -27,7 +27,7 @@ const Home = () => {
 							Personify.
 						</h1>
 						<p
-							className="text-sm sm:text-lg md:text-xl lg:text-xl 
+							className="text-sm sm:text-lg md:text-2xl lg:text-2xl 
                          mt-3 md:mt-4 lg:mt-5 max-w-md lg:max-w-lg
                          text-[#F7CFD8]
                          px-6 md:px-0"

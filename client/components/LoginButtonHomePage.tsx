@@ -9,7 +9,7 @@ const LoginButtonHomePage = () => {
 		<div className="mt-12">
 			<button
 				onClick={handleLoginClick}
-				className="bg-white text-black py-3 px-12 rounded-full font-medium font-inter text-lg hover:bg-gray-300 transition cursor-pointer"
+				className="bg-white text-black py-3 px-12 rounded-full font-large font-inter text-2xl hover:bg-gray-300 transition cursor-pointer"
 			>
 				Login
 			</button>

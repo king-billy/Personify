@@ -29,7 +29,7 @@ const imagePlugin = {
 				const yPos = yAxis.getPixelForTick(index);
 				const xOffset = chartArea.left - 30;
 
-				// Draw artist name regardless of image
+				// Draw artist name
 				ctx.fillStyle = "#F7CFD8";
 				ctx.font = "14px sans-serif";
 				ctx.textBaseline = "middle";
@@ -108,10 +108,13 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 	const options = {
 		indexAxis: "y" as const,
 		responsive: true,
-		maintainAspectRatio: false,
+		maintainAspectRatio: false, // This is already set correctly
 		layout: {
 			padding: {
 				left: isGenreChart ? 0 : 60,
+				right: 0,
+				top: 0,
+				bottom: 0,
 			},
 		},
 		scales: {
@@ -165,6 +168,13 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 			customImageData: data,
 			isGenreChart: isGenreChart,
 			tooltip: {
+				backgroundColor: "rgba(17, 24, 39, 0.95)",
+				titleColor: "#F7CFD8",
+				bodyColor: "#E5E7EB",
+				borderColor: "rgba(255, 255, 255, 0.1)",
+				borderWidth: 1,
+				padding: 12,
+				displayColors: false,
 				callbacks: {
 					title: (items: any[]) => {
 						const index = items[0].dataIndex;
@@ -172,7 +182,7 @@ const SpotifyBarChart: React.FC<BarChartProps> = (props) => {
 					},
 					label: (item: any) => {
 						const value = item.raw;
-						return isGenreChart ? `${value} artists` : `${value} plays`;
+						return [isGenreChart ? `🎵 ${value} artists` : `🎧 ${value} plays`, ""];
 					},
 				},
 			},

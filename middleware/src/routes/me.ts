@@ -66,7 +66,7 @@ async function classifyVibes(token: string, timeRange: string = "short_term"): P
 		const trackSummary = topTracks.items.map((track: any) => `- ${track.name} by ${track.artists[0]?.name || "Unknown Artist"}`).join("\n");
 
 		const prompt = `
-    Analyze these songs and identify the top 5 dominant vibes with percentages:
+    Analyze these songs and identify the top 10 dominant vibes with percentages:
     ${trackSummary}
   
   VIBE OPTIONS (choose ONLY these exact names):
@@ -92,12 +92,12 @@ async function classifyVibes(token: string, timeRange: string = "short_term"): P
   20. Alternative
   
   RESPONSE FORMAT (must follow exactly):
-  Chill:45, Energetic:30, Melancholy:25, Romantic:15, Confident:10
+  Chill:25, Energetic:20, Melancholy:15, Romantic:10, Confident:8, Nostalgic:7, Artsy:6, Dark:5, Rage:3, Futuristic:1
   
   Rules:
   - Only use the provided vibe names
   - Percentages must sum to 100
-  - Include exactly 5 vibes
+  - Include exactly 10 vibes
   - No additional text or explanation
 `;
 
@@ -119,27 +119,37 @@ async function classifyVibes(token: string, timeRange: string = "short_term"): P
 		}
 
 		// Validate response
-		if (Object.keys(vibeDict).length === 5 && Object.values(vibeDict).reduce((a, b) => a + b, 0) === 100) {
+		if (Object.keys(vibeDict).length === 10 && Object.values(vibeDict).reduce((a, b) => a + b, 0) === 100) {
 			return vibeDict;
 		} else {
 			console.warn("Invalid format from Gemini, using fallback");
 			return {
-				Chill: 0,
-				Energetic: 0,
-				Romantic: 0,
-				Dark: 0,
-				Cinematic: 0,
+				Chill: 15,
+				Energetic: 15,
+				Romantic: 10,
+				Dark: 10,
+				Cinematic: 10,
+				Melancholy: 10,
+				Confident: 10,
+				Nostalgic: 10,
+				Artsy: 5,
+				Futuristic: 5,
 			};
 		}
 	} catch (error: any) {
 		console.error(`Error in classifyVibes: ${error.message}`);
 		console.error(error.stack);
 		return {
-			Chill: 1,
-			Energetic: 1,
-			Romantic: 1,
-			Dark: 1,
-			Cinematic: 1,
+			Chill: 10,
+			Energetic: 10,
+			Romantic: 10,
+			Dark: 10,
+			Cinematic: 10,
+			Melancholy: 10,
+			Confident: 10,
+			Nostalgic: 10,
+			Artsy: 10,
+			Futuristic: 10,
 		};
 	}
 }
@@ -148,6 +158,7 @@ const router = Router();
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
+
 /**
  *
  * @param token
@@ -490,6 +501,47 @@ router.get("/genre-count", async (req: Request, res: Response) => {
 		res.json({ count: genres.size });
 	} catch (err: any) {
 		console.error("Genre count error:", err.message);
+		res.status(500).json({ error: err.message });
+	}
+});
+
+router.get("/top-tracks", async (req: Request, res: Response) => {
+	const token = req.headers.authorization?.split(" ")[1];
+	const timeRange = (req.query.time_range as string) || "short_term";
+	const limit = parseInt(req.query.limit as string) || 10;
+
+	if (!token) {
+		res.status(401).json({ error: "Missing access token" });
+		return;
+	}
+
+	if (!["short_term", "medium_term", "long_term"].includes(timeRange)) {
+		res.status(400).json({
+			error: "Invalid time_range. Use 'short_term', 'medium_term', or 'long_term'.",
+		});
+		return;
+	}
+
+	try {
+		const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?limit=${limit}&time_range=${timeRange}`, {
+			headers: createAuthHeader(token),
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			throw new Error(data.error?.message || "Failed to fetch top tracks");
+		}
+
+		const tracks = data.items.map((track: any) => ({
+			name: track.name,
+			artist: track.artists[0]?.name || "Unknown Artist",
+			image: track.album?.images?.[0]?.url || "",
+		}));
+
+		res.json({ tracks });
+	} catch (err: any) {
+		console.error("Top tracks error:", err.message);
 		res.status(500).json({ error: err.message });
 	}
 });
