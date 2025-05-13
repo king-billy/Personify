@@ -156,11 +156,14 @@ const VibesTreeMap: React.FC<TreeMapProps> = ({ data, title }) => {
 					margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
 					label={(node) => `${node.id}`}
 					labelSkipSize={12}
+					// @ts-ignore
 					labelTextColor={(node) => getTextColor(node.data.color)}
 					parentLabelTextColor={{ from: "color", modifiers: [["darker", 2]] }}
+					// @ts-ignore
 					colors={(node) => node.data.color}
 					borderWidth={1}
 					borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
+					// @ts-ignore
 					tooltip={CustomTooltip}
 					nodeOpacity={1}
 					tile="squarify"
