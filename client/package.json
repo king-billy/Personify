@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "next lint",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"watch_test": "vitest --watch"
 	},
 	"dependencies": {
 		"@nivo/treemap": "^0.94.0",
